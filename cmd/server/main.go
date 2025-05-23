@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"go-ecommerce-backend-api.com/internal/routers"
+)
 
-func main(){
-	fmt.Println("Starting server...")
+func main() {
+	r := routers.NewRouter()
+
+	r.Run(":8002") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
