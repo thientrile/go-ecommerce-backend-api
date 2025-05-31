@@ -25,6 +25,9 @@ func SuccessResponse(c *gin.Context, code int, data interface{}) {
 
 // error response
 func ErrorResponse(c *gin.Context, code int, message string) {
+	if message == "" {
+		message = msg[code]
+	}
 	c.JSON(http.StatusOK, ResponstData{
 		Code:    code,
 		Message: message,
