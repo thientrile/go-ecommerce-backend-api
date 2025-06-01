@@ -1,16 +1,11 @@
 server:
   port: 8082
-databases:
-- user: admin
-  password: admin
-  host: localhost
-  dbName: shopDev
-- user: order
-  password: order
-  host: localhost
-  dbName: orderDev  
-security:
-  jwt:
-    key: abcd1234
-    algorithm: HS256
-    expiration: 3600
+msql:
+  host: 127.0.0.1
+  port: 3306
+  username: root
+  password: root1234
+  dbname: shopDevgo
+  maxIdleConns: 10 # Số kết nối nhàn rỗi tối đa
+  maxOpenConns: 100 # Số kết nối mở tối đa
+connMaxLifetime: 3600 # Thời gian tối đa của kết nối (giây)
