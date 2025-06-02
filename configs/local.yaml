@@ -1,5 +1,6 @@
 server:
-  port: 8082
+  port: 8002
+  mode: dev # Chế độ chạy: dev, prod
 mysql:
   host: 127.0.0.1
   port: 3306
