@@ -1,25 +1,23 @@
+
 name: go-ecommerce-backend-api
 
 services:
   mysql:
     image: mysql:8.0
     container_name: go-ecommerce-mysql
-    # restart: always
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"  # Cho phép mật khẩu trống cho root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_ROOT_PASSWORD: "1"
     ports:
-      - "3306:3306"  # Ánh xạ cổng 3306
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    
     networks:
       - go-ecommerce-network
 
   redis:
     image: redis:7.2
     container_name: go-ecommerce-redis
-    # restart: always
     ports:
       - "6379:6379"
     command: ["redis-server", "--requirepass", ""]
@@ -28,11 +26,52 @@ services:
     networks:
       - go-ecommerce-network
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: go-ecommerce-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+    networks:
+      - go-ecommerce-network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: go-ecommerce-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"    # Truy cập trong container (PLAINTEXT)
+      - "29092:29092"  # Truy cập từ host (PLAINTEXT_HOST)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://go-ecommerce-kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - go-ecommerce-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: go-ecommerce-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - go-ecommerce-network
+
 volumes:
   mysql-data:
-    driver: local
   redis_data:
-    driver: local
 
 networks:
   go-ecommerce-network:

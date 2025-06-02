@@ -11,3 +11,6 @@
 {"level":"INFO","time":"2025-06-02T16:54:35.373+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
 {"level":"INFO","time":"2025-06-02T16:54:35.384+0700","caller":"initialize/mysql.init.go:30","msg":"InitMysql initialization successful"}
 {"level":"INFO","time":"2025-06-02T16:54:35.882+0700","caller":"initialize/mysql.init.go:37","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-02T17:14:39.951+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-02T17:14:39.982+0700","caller":"initialize/mysql.init.go:30","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-02T17:14:41.086+0700","caller":"initialize/mysql.init.go:37","msg":"Mysql connection pool and tables migration completed successfully"}
