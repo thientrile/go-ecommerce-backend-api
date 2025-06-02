@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	kafkaURL   = "localhost:29092" // ⚠️ Dùng tên container trong Docker
+	kafkaURL   = "localhost:29092" 	
 	kafkaTopic = "user_topic_vip"
 )
 
