@@ -11,8 +11,15 @@ mysql:
   connMaxLifetime: 3600 # Thời gian tối đa của kết nối (giây)
 logger:
   log_level: debug # Mức độ log: debug, info, warn, error
-  file_log_name: "./storage/logs/dev.xxx.log" # Tên file log
+  file_log_name: "dev" # Tên file log
+  file_log_path: "./storage/logs" # Thư mục lưu trữ log
   max_size: 500
   max_backups: 3 # Số lượng bản sao lưu tối đa
   max_age: 30 # Số ngày lưu trữ log
   compress: true # Nén file log
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+  database: 0
+  pool_size: 10 # Kích thước pool kết nối Redis  

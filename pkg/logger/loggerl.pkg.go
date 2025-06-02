@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/natefinch/lumberjack"
 	"go-ecommerce-backend-api.com/pkg/setting"
@@ -42,8 +43,10 @@ func NewLogger(config setting.LoggerSetting) *LoggerZap {
 		}
 	}
 	encoder := getEncoderLog()
+	//curent time
+	  currentDate := time.Now().Format("2006-01-02")
 	hook := lumberjack.Logger{
-		Filename:   config.File_log_name,
+		Filename:   fmt.Sprintf("%s/%s_%s.log",config.File_log_path, config.File_log_name, currentDate), // log file name
 		MaxSize:    config.Max_size, // megabytes
 		MaxBackups: config.Max_backups,
 		MaxAge:     config.Max_age,  //days

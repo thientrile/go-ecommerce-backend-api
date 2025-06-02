@@ -1,8 +1,17 @@
 package setting
 
 type Config struct {
-	Mysql   MSQLSetting   `mapstruct:"mysql"`
+	Mysql  MSQLSetting   `mapstruct:"mysql"`
 	Logger LoggerSetting `mapstruct:"logger"`
+	Redis  RedisSetting  `mapstruct:"redis"`
+}
+
+type RedisSetting struct {
+	Host      string `mapstruct:"host"`
+	Port      int    `mapstruct:"port"`
+	Password  string `mapstruct:"password"`
+	Database  int    `mapstruct:"database"`
+	Pool_size int    `mapstruct:"pool_size"`
 }
 
 type MSQLSetting struct {
@@ -15,9 +24,11 @@ type MSQLSetting struct {
 	MaxOpenConns    int    `mapstruct:"maxOpenConns"`
 	ConnMaxLifetime int    `mapstruct:"connMaxLifetime"`
 }
+
 type LoggerSetting struct {
 	Log_Level     string `mapstruct:"log_level"`
 	File_log_name string `mapstruct:"file_log_name"`
+	File_log_path string `mapstruct:"file_log_path"`
 	Max_size      int    `mapstruct:"max_size"`
 	Max_backups   int    `mapstruct:"max_backups"`
 	Max_age       int    `mapstruct:"max_age"`
