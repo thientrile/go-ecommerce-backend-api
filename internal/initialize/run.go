@@ -25,5 +25,5 @@ func Run() {
 	// initialize router
 	r := InitRouter()
 
-	r.Run(fmt.Sprintf(":%v",s.Port)) // Start the server on port 8080
+	r.Run(fmt.Sprintf(":%v", s.Port)) // Start the server on port 8080
 }
