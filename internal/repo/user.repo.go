@@ -16,14 +16,14 @@ type IUserRepository interface {
 	GetUserByEmail(email string) bool
 }
 
-type userRepository struct {
+type UserRepository struct {
 }
 
-func (*userRepository) GetUserByEmail(email string) bool {
+func (*UserRepository) GetUserByEmail(email string) bool {
 	// TODO: implement actual logic
 	return true
 }
 
 func NewUserRepository() IUserRepository {
-	return &userRepository{}
+	return &UserRepository{}
 }
