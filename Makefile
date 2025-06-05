@@ -13,9 +13,9 @@ DB_NAME = shopDevgo
 DB_USER = root
 DB_PASSWORD = strongpassword123!
 GOOSE_DRIVER ?= mysql
-GOOSE_DBSTRING = "$(DB_USER):$(DB_PASSWORD)@tcp(127.0.0.1:33306)/$(DB_NAME)"
+GOOSE_DBSTRING = $(DB_USER):$(DB_PASSWORD)@tcp(127.0.0.1:3306)/$(DB_NAME)
 MIGRATIONS_DIR = migrations
-GOOSE_MIGRATION_DIR = $(MIGRATIONS_DIR)/sql
+GOOSE_MIGRATION_DIR ?= sql/schema
 
 # Get MySQL container name from docker-compose
 DB_CONTAINER = go-ecommerce-mysql
@@ -94,10 +94,10 @@ dump-full:
 	@echo "✅ Full dump saved to $(MIGRATIONS_DIR)/$(DB_NAME)_full.sql"
 # ================== Goose DB Migration ==================
 goose-up:
-	GOOSE_DRIVER=$(GOOSE_DRIVER) GOOSE_DBSTRING=$(GOOSE_DBSTRING) goose -dir=$(GOOSE_MIGRATION_DIR) up
+	@set GOOSE_DRIVER=$(GOOSE_DRIVER)&& set GOOSE_DBSTRING=$(GOOSE_DBSTRING)&& goose -dir=$(GOOSE_MIGRATION_DIR) up
 
 goose-down:
-	GOOSE_DRIVER=$(GOOSE_DRIVER) GOOSE_DBSTRING=$(GOOSE_DBSTRING) goose -dir=$(GOOSE_MIGRATION_DIR) down
+	@set GOOSE_DRIVER=$(GOOSE_DRIVER)&& set GOOSE_DBSTRING=$(GOOSE_DBSTRING)&& goose -dir=$(GOOSE_MIGRATION_DIR) down
 
 goose-reset:
-	GOOSE_DRIVER=$(GOOSE_DRIVER) GOOSE_DBSTRING=$(GOOSE_DBSTRING) goose -dir=$(GOOSE_MIGRATION_DIR) reset
+	@set GOOSE_DRIVER=$(GOOSE_DRIVER)&& set GOOSE_DBSTRING=$(GOOSE_DBSTRING)&& goose -dir=$(GOOSE_MIGRATION_DIR) reset

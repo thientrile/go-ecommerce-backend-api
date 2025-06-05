@@ -2,7 +2,7 @@ package repo
 
 import (
 	"go-ecommerce-backend-api.com/global"
-	"go-ecommerce-backend-api.com/internal/model"
+	"go-ecommerce-backend-api.com/internal/database"
 )
 
 // type UserRepo struct{}
@@ -22,13 +22,21 @@ type IUserRepository interface {
 }
 
 type UserRepository struct {
+	sqlc *database.Queries
 }
 
-func (*UserRepository) GetUserByEmail(email string) bool {
-	row := global.MDB.Table(TableNameGoCrmUser).Where("usr_email = ?", email).First(&model.GoCrmUser{}).RowsAffected
-	return row != NumberNull
+func (up *UserRepository) GetUserByEmail(email string) bool {
+	// row := global.MDB.Table(TableNameGoCrmUser).Where("usr_email = ?", email).First(&model.GoCrmUser{}).RowsAffected
+	// return row != NumberNull
+	user, err := up.sqlc.GetUserByEmail(ctx, email)
+	if err != nil {
+		return false
+	}
+	return user.UsrID != 0
 }
 
 func NewUserRepository() IUserRepository {
-	return &UserRepository{}
+	return &UserRepository{
+		sqlc: database.New(global.MDBC),
+	}
 }
