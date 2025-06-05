@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã OTP của bạn: {{.otp}} - Không chia sẻ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+        h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .otp-code-section {
+            background-color: #eaf6ff;
+            border: 2px dashed #a0d9ff;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+            border-radius: 5px;
+        }
+        .otp-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            letter-spacing: 3px;
+        }
+        .security-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            margin-top: 25px;
+            border-radius: 5px;
+            color: #856404;
+        }
+        .security-notice ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding: 0;
+        }
+        .security-notice li {
+            margin-bottom: 8px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+            border-top: 1px solid #eeeeee;
+            padding-top: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Mã Xác Thực Một Lần (OTP) của bạn</h2>
+
+        <p>Kính gửi Người dùng,</p>
+
+        <p>Cảm ơn bạn đã bắt đầu quá trình xác minh. Để hoàn tất hành động của bạn, vui lòng sử dụng Mã Xác Thực Một Lần (OTP) sau:</p>
+
+        <div class="otp-code-section">
+            <p>Mã OTP của bạn:</p>
+            <p class="otp-code">{{.otp}}</p>
+        </div>
+
+        <p>Mã này có hiệu lực trong vòng **{{.expiration_minutes}} phút** tới. Vui lòng nhập mã này vào trang xác minh để tiếp tục.</p>
+
+        <div class="security-notice">
+            <p><strong>Lưu ý Bảo mật Quan trọng:</strong></p>
+            <ul>
+                <li><strong>Không chia sẻ mã OTP này với bất kỳ ai.</strong> Mã này là duy nhất cho yêu cầu hiện tại của bạn và rất quan trọng để bảo vệ tài khoản của bạn.</li>
+                <li>Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này. Tài khoản của bạn vẫn an toàn.</li>
+            </ul>
+        </div>
+
+        <p>Nếu bạn có bất kỳ câu hỏi hoặc gặp sự cố, vui lòng liên hệ với nhóm hỗ trợ của chúng tôi.</p>
+
+        <p>Trân trọng,</p>
+        <p>Đội ngũ Liguni company</p>
+
+        <div class="footer">
+            <p>Vui lòng không trả lời email này.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -12,3 +12,27 @@
 {"level":"INFO","time":"2025-06-05T15:49:23.466+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
 {"level":"INFO","time":"2025-06-05T15:49:23.479+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
 {"level":"INFO","time":"2025-06-05T15:49:24.029+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T17:54:31.202+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T17:54:31.226+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T17:54:31.959+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T18:05:06.564+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T18:05:06.577+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T18:05:07.008+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T18:23:05.017+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T18:23:05.027+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T18:23:05.399+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T18:54:40.489+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T18:54:40.499+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T18:54:40.968+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T18:57:41.580+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T18:57:41.594+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T18:57:42.203+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T19:03:27.781+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T19:03:27.796+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T19:03:28.354+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T19:06:57.536+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T19:06:57.546+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T19:06:58.033+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T19:07:45.124+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T19:07:45.132+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T19:07:45.524+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}

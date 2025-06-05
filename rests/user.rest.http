@@ -1,0 +1,13 @@
+@baseUrl=http://localhost:8002/v1/2025
+
+
+# user regist
+
+POST {{baseUrl}}/user/register
+Content-Type: application/json
+
+{
+ 
+  "email": "ttri0403@hotmail.com",
+  "purpose":"test"
+}
