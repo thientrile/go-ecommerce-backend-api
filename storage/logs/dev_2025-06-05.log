@@ -1,0 +1,14 @@
+{"level":"INFO","time":"2025-06-05T15:37:49.779+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"ERROR","time":"2025-06-05T15:37:51.076+0700","caller":"initialize/mysql.init.go:19","msg":"InitMysql  initialization error","error":"dial tcp: lookup go-ecommerce-mysql: no such host","stacktrace":"go-ecommerce-backend-api.com/internal/initialize.checkErrorPanic\n\tD:/OneDrive/Documents/code/backend/go/go-ecommerce-backend-api/internal/initialize/mysql.init.go:19\ngo-ecommerce-backend-api.com/internal/initialize.InitMysql\n\tD:/OneDrive/Documents/code/backend/go/go-ecommerce-backend-api/internal/initialize/mysql.init.go:33\ngo-ecommerce-backend-api.com/internal/initialize.Run\n\tD:/OneDrive/Documents/code/backend/go/go-ecommerce-backend-api/internal/initialize/run.go:21\nmain.main\n\tD:/OneDrive/Documents/code/backend/go/go-ecommerce-backend-api/cmd/server/main.go:11\nruntime.main\n\tC:/Program Files/Go/src/runtime/proc.go:283"}
+{"level":"INFO","time":"2025-06-05T15:40:18.262+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T15:40:18.273+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T15:40:18.335+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T15:47:16.388+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T15:47:16.400+0700","caller":"initialize/mysql.init.go:33","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T15:47:16.480+0700","caller":"initialize/mysql.init.go:42","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T15:47:57.843+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T15:47:57.855+0700","caller":"initialize/mysql.init.go:33","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T15:47:57.955+0700","caller":"initialize/mysql.init.go:42","msg":"Mysql connection pool and tables migration completed successfully"}
+{"level":"INFO","time":"2025-06-05T15:49:23.466+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-05T15:49:23.479+0700","caller":"initialize/mysql.init.go:34","msg":"InitMysql initialization successful"}
+{"level":"INFO","time":"2025-06-05T15:49:24.029+0700","caller":"initialize/mysql.init.go:43","msg":"Mysql connection pool and tables migration completed successfully"}

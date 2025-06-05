@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"go-ecommerce-backend-api.com/global"
-	"go-ecommerce-backend-api.com/internal/model"
+	// "go-ecommerce-backend-api.com/internal/model"
+	"go-ecommerce-backend-api.com/internal/po"
 
 	// "go-ecommerce-backend-api.com/internal/po"
 	"go.uber.org/zap"
@@ -26,7 +27,6 @@ func InitMysql() {
 
 	dsn := "%s:%s@tcp(%s:%v)/%s?charset=utf8mb4&parseTime=True&loc=Local"
 	var s = fmt.Sprintf(dsn, m.Username, m.Password, m.Host, m.Port, m.Dbname)
-	fmt.Println("dsn:: ", s)
 	db, err := gorm.Open(mysql.Open(s), &gorm.Config{
 		SkipDefaultTransaction: false,
 	})
@@ -77,9 +77,9 @@ func GenTableDAO() {
 
 func migrateTables() {
 	err := global.MDB.AutoMigrate(
-		// &po.User{},
-		// &po.Role{},
-		&model.GoCrmUserV2{},
+		&po.User{},
+		&po.Role{},
+		// &model.GoCrmUserV2{},
 	)
 	if err != nil {
 		fmt.Printf("Migrate Tables err:: %s", err)

@@ -2,7 +2,7 @@ server:
   port: 8002
   mode: dev # Chế độ chạy: dev, prod
 mysql:
-  host: 127.0.0.1
+  host: go-ecommerce-mysql #127.0.0.1
   port: 3306 #3306
   username: root
   password: strongpassword123!
@@ -19,7 +19,7 @@ logger:
   max_age: 30 # Số ngày lưu trữ log
   compress: true # Nén file log
 redis:
-  host: 127.0.0.1 #go-ecommerce-redis
+  host: go-ecommerce-redis #127.0.0.1
   port: 6379 #6379
   password: "strongredispass"
   database: 0

@@ -22,7 +22,7 @@ DB_CONTAINER = go-ecommerce-mysql
 
 
 # Default target: run app
-run: docker-up
+run: 
 	go run ./cmd/$(APP_NAME)/
 
 # Start Docker containers
@@ -40,7 +40,7 @@ docker-down:
 # Rebuild Docker images
 docker-build:
 	@echo "🔧 Rebuilding Docker images..."
-	@docker-compose -f $(DOCKER_COMPOSE) build
+	@docker-compose -f $(DOCKER_COMPOSE) up --build
 	@echo "✅ Docker images rebuilt."
 
 # View logs

@@ -1,0 +1,19 @@
+{
+  "name": "mysql-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "database.hostname": "mysql",
+    "database.port": "3306",
+    "database.user": "root",
+    "database.password": "strongpassword123!",
+    "database.server.id": "184054",
+    "database.include.list": "shopDevgo",
+    "include.schema.changes": "true",
+    "topic.prefix": "shopdev_mysql",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+    "schema.history.internal.kafka.topic": "schema-changes.shopDevgo",
+    "snapshot.mode": "initial"
+
+
+  }
+}

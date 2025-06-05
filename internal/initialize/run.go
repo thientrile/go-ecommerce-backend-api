@@ -11,9 +11,7 @@ func Run() {
 
 	// load configuration
 	LoadConfig()
-	m := global.Config.Mysql
 	s := global.Config.Server
-	fmt.Println("Configuration loaded successfully", m.Username, m.Password)
 	// initialize logger
 	InitLogger()
 	global.Logger.Info("config log ok!!", zap.String("status", "success"))

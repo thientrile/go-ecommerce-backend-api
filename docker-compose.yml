@@ -1,5 +1,5 @@
-version: "3.9"
-
+# version: "3.9"
+name: go-ecommerce-backend-api
 services:
   crm.shopdev.com:
     build:
@@ -8,9 +8,9 @@ services:
     container_name: go-ecommerce-backend
     command: ["/crm.shopdev.com", "configs/local.yaml"]
     volumes:
-      - ./configs:/configs    # Mount configs ngoài cho dễ thay đổi config
+      - ./configs:/configs
     ports:
-      - "8001:8002"           # Port mapping cho backend Go app
+      - "8001:8002"
     depends_on:
       mysql:
         condition: service_healthy
@@ -21,16 +21,18 @@ services:
     networks:
       - go-ecommerce-network
     restart: unless-stopped
+
   mysql:
     image: mysql:8.0
     container_name: go-ecommerce-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: "strongpassword123!"   # Đổi pass mạnh nha
-      MYSQL_DATABASE: "shopDevgo"                 # Tạo database tự động
+      MYSQL_ROOT_PASSWORD: "strongpassword123!"
+      MYSQL_DATABASE: "shopDevgo"
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./mysql-custom.cnf:/etc/mysql/conf.d/custom.cnf  # cấu hình binlog
     networks:
       - go-ecommerce-network
     restart: unless-stopped
@@ -44,7 +46,7 @@ services:
   redis:
     image: redis:7.2
     container_name: go-ecommerce-redis
-    command: ["redis-server", "--requirepass", "strongredispass"]  # Set pass mạnh
+    command: ["redis-server", "--requirepass", "strongredispass"]
     ports:
       - "6379:6379"
     volumes:
@@ -113,6 +115,34 @@ services:
     networks:
       - go-ecommerce-network
     restart: unless-stopped
+
+  debezium:
+    image: quay.io/debezium/connect:3.1.2.Final
+    container_name: go-ecommerce-debezium
+    depends_on:
+      - kafka
+      - mysql
+      - zookeeper
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: debezium_connect_configs
+      OFFSET_STORAGE_TOPIC: debezium_connect_offsets
+      STATUS_STORAGE_TOPIC: debezium_connect_statuses
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      PLUGIN_PATH: /kafka/connect,/debezium-connector-mysql
+      CONNECT_REST_ADVERTISED_HOST_NAME: debezium
+    networks:
+      - go-ecommerce-network
+    restart: unless-stopped
+
 
 volumes:
   mysql-data:

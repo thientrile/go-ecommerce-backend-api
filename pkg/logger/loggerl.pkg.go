@@ -37,6 +37,18 @@ func NewLogger(config setting.LoggerSetting) *LoggerZap {
 		{
 			level = zapcore.ErrorLevel
 		}
+	case "dpanic":
+		{
+			level = zapcore.DPanicLevel
+		}
+	case "panic":
+		{
+			level = zapcore.PanicLevel
+		}
+	case "fatal":
+		{
+			level = zapcore.FatalLevel
+		}
 	default:
 		{
 			level = zapcore.InfoLevel
@@ -44,10 +56,10 @@ func NewLogger(config setting.LoggerSetting) *LoggerZap {
 	}
 	encoder := getEncoderLog()
 	//curent time
-	  currentDate := time.Now().Format("2006-01-02")
+	currentDate := time.Now().Format("2006-01-02")
 	hook := lumberjack.Logger{
-		Filename:   fmt.Sprintf("%s/%s_%s.log",config.File_log_path, config.File_log_name, currentDate), // log file name
-		MaxSize:    config.Max_size, // megabytes
+		Filename:   fmt.Sprintf("%s/%s_%s.log", config.File_log_path, config.File_log_name, currentDate), // log file name
+		MaxSize:    config.Max_size,                                                                      // megabytes
 		MaxBackups: config.Max_backups,
 		MaxAge:     config.Max_age,  //days
 		Compress:   config.Compress, // disabled by default
