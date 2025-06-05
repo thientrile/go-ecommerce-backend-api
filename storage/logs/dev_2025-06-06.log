@@ -1,0 +1,4 @@
+{"level":"INFO","time":"2025-06-06T00:10:59.905+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-06T00:10:59.922+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
+{"level":"INFO","time":"2025-06-06T00:13:44.689+0700","caller":"initialize/run.go:17","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-06T00:13:44.702+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}

@@ -16,10 +16,15 @@ func Run() {
 	InitLogger()
 	global.Logger.Info("config log ok!!", zap.String("status", "success"))
 	// initialize mysql
+
+	// InitMysql()
+	// chuyển dùng sqlc và goose
 	InitMysqlC()
+	// init service interface
+	InitServiceInterface()
 	// initialize redis
 	InitRedis()
-// init kafka
+	// init kafka
 	InitKafka()
 	// initialize router
 	r := InitRouter()

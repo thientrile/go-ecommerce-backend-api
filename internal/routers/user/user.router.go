@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
+	"go-ecommerce-backend-api.com/internal/controller/account"
 	"go-ecommerce-backend-api.com/internal/wire"
 	// 	"go-ecommerce-backend-api.com/internal/controller"
 	// 	"go-ecommerce-backend-api.com/internal/repo"
@@ -23,6 +24,7 @@ func (pr *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
 	{
 		// userRouterPublic.POST("/register",useHandlerNoDependency.Regisger) // Register a new user -> Yes ->No
 		userRouterPublic.POST("/register", userController.Regisger) // Register a new user -> Yes ->No
+		userRouterPublic.POST("/login", account.Login.Login) // Register a new user -> Yes ->No
 		userRouterPublic.GET("/otp")
 	}
 

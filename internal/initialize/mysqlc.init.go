@@ -5,74 +5,29 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"go-ecommerce-backend-api.com/global"
-	// "go-ecommerce-backend-api.com/internal/model"
-	"go-ecommerce-backend-api.com/internal/po"
-
-	// "go-ecommerce-backend-api.com/internal/po"
-	"gorm.io/gen"
 )
 
 func InitMysqlC() {
 	m := global.Config.Mysql
-
-	dsn := "%s:%s@tcp(%s:%v)/%s?charset=utf8mb4&parseTime=True&loc=Local"
-	var s = fmt.Sprintf(dsn, m.Username, m.Password, m.Host, m.Port, m.Dbname)
-	db, err := sql.Open("mysql", s)
-	checkErrorPanic(err, "InitMysql  initialization error")
-	global.Logger.Info("InitMysql initialization successful")
-	global.MDBC = db
-
-	//set Pool
-	SetPoolC()
-	//migrate tables
-	// migrateTables()
-	// generate table dao
-	// GenTableDAO()
-	global.Logger.Info("Mysql connection pool and tables migration completed successfully")
-}
-
-func SetPoolC() {
-	m := global.Config.Mysql
-	// sqlDb, err := global.MDBC.DB()
-	// if err != nil {
-	// 	fmt.Printf("Mysql error:: %s", err)
-	// }
-	global.MDBC.SetMaxIdleConns(m.MaxIdleConns)
-	global.MDBC.SetMaxOpenConns(m.MaxOpenConns)
-	global.MDBC.SetConnMaxLifetime(time.Duration(m.ConnMaxLifetime) * time.Second)
-	global.MDBC.SetConnMaxIdleTime(time.Duration(m.ConnMaxIdleTime) * time.Second)
-
-}
-
-func GenTableDAOC() {
-	// gen get apply for file model
-	g := gen.NewGenerator(gen.Config{
-		OutPath: "./internal/model",
-		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
-	})
-
-	// gormdb, _ := gorm.Open(mysql.Open("root:@(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"))
-	g.UseDB(global.MDB) // reuse your gorm db
-	g.GenerateModel("go_crm_user")
-	// Generate basic type-safe DAO API for struct `model.User` following conventions
-	// g.ApplyBasic(model.User{})
-
-	// // Generate Type Safe API with Dynamic SQL defined on Querier interface for `model.User` and `model.Company`
-	// g.ApplyInterface(func(Querier) {}, model.User{}, model.Company{})
-
-	// Generate the code
-	g.Execute()
-}
-
-func migrateTablesC() {
-	err := global.MDB.AutoMigrate(
-		&po.User{},
-		&po.Role{},
-		// &model.GoCrmUserV2{},
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%v)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		m.Username, m.Password, m.Host, m.Port, m.Dbname,
 	)
-	if err != nil {
-		fmt.Printf("Migrate Tables err:: %s", err)
-	}
 
+	db, err := sql.Open("mysql", dsn)
+	checkErrorPanic(err, "InitMysql initialization error")
+
+	// Set pool cấu hình
+	db.SetMaxIdleConns(m.MaxIdleConns)
+	db.SetMaxOpenConns(m.MaxOpenConns)
+	db.SetConnMaxLifetime(time.Duration(m.ConnMaxLifetime) * time.Second)
+	db.SetConnMaxIdleTime(time.Duration(m.ConnMaxIdleTime) * time.Second)
+
+	// Test kết nối
+	err = db.Ping()
+	checkErrorPanic(err, "Failed to ping DB")
+
+	global.Logger.Info("✅ MySQL connection pool initialized successfully")
+	global.MDBC = db
 }
