@@ -1,5 +1,9 @@
-# Project Name
+# Makefile for go-ecommerce-backend-api
+
+# Project Config
 APP_NAME = server
+IMAGE_NAME = go-ecommerce-backend-api
+TAG = latest
 
 # Docker Compose File
 DOCKER_COMPOSE = docker-compose.yml
@@ -12,6 +16,10 @@ MIGRATIONS_DIR = migrations
 
 # Get MySQL container name from docker-compose
 DB_CONTAINER = go-ecommerce-mysql
+
+.PHONY: build up down clean logs rebuild status
+
+
 
 # Default target: run app
 run: docker-up

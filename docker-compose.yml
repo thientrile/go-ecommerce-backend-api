@@ -1,33 +1,65 @@
-
-name: go-ecommerce-backend-api
+version: "3.9"
 
 services:
+  crm.shopdev.com:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-ecommerce-backend
+    command: ["/crm.shopdev.com", "configs/local.yaml"]
+    volumes:
+      - ./configs:/configs    # Mount configs ngoài cho dễ thay đổi config
+    ports:
+      - "8001:8002"           # Port mapping cho backend Go app
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - go-ecommerce-network
+    restart: unless-stopped
   mysql:
     image: mysql:8.0
     container_name: go-ecommerce-mysql
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_ROOT_PASSWORD: "1"
+      MYSQL_ROOT_PASSWORD: "strongpassword123!"   # Đổi pass mạnh nha
+      MYSQL_DATABASE: "shopDevgo"                 # Tạo database tự động
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
       - go-ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pstrongpassword123!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   redis:
     image: redis:7.2
     container_name: go-ecommerce-redis
+    command: ["redis-server", "--requirepass", "strongredispass"]  # Set pass mạnh
     ports:
       - "6379:6379"
-    command: ["redis-server", "--requirepass", ""]
     volumes:
       - redis_data:/data
     networks:
       - go-ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "strongredispass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.4.0
     container_name: go-ecommerce-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -35,15 +67,21 @@ services:
       - "2181:2181"
     networks:
       - go-ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.4.0
     container_name: go-ecommerce-kafka
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"    # Truy cập trong container (PLAINTEXT)
-      - "29092:29092"  # Truy cập từ host (PLAINTEXT_HOST)
+      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -54,6 +92,12 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     networks:
       - go-ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -68,6 +112,7 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     networks:
       - go-ecommerce-network
+    restart: unless-stopped
 
 volumes:
   mysql-data:
