@@ -10,6 +10,7 @@ mysql:
   maxIdleConns: 10 # Số kết nối nhàn rỗi tối đa
   maxOpenConns: 100 # Số kết nối mở tối đa
   connMaxLifetime: 3600 # Thời gian tối đa của kết nối (giây)
+  connMaxIdleTime: 300 # Thời gian tối đa của kết nối nhàn rỗi (giây)
 logger:
   log_level: debug # Mức độ log: debug, info, warn, error
   file_log_name: "dev" # Tên file log
@@ -24,3 +25,10 @@ redis:
   password: "strongredispass"
   database: 0
   pool_size: 10 # Kích thước pool kết nối Redis  
+kafka:
+  host: go-ecommerce-kafka
+  port: 9092
+  topic:
+    product: "product-topic"
+    order: "order-topic"
+    auth: "otp-auth-topic"

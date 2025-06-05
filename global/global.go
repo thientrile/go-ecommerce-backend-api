@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/segmentio/kafka-go"
 	"go-ecommerce-backend-api.com/pkg/logger"
 	"go-ecommerce-backend-api.com/pkg/setting"
 	"gorm.io/gorm"
@@ -15,4 +16,5 @@ var (
 	RDB    *redis.Client
 	MDB    *gorm.DB
 	MDBC   *sql.DB
+	KafkaProducer *kafka.Writer
 )

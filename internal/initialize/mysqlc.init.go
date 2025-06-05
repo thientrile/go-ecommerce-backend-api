@@ -10,16 +10,8 @@ import (
 	"go-ecommerce-backend-api.com/internal/po"
 
 	// "go-ecommerce-backend-api.com/internal/po"
-	"go.uber.org/zap"
 	"gorm.io/gen"
 )
-
-func checkErrorPanicC(err error, errString string) {
-	if err != nil {
-		global.Logger.Error(errString, zap.Error(err))
-		panic(err)
-	}
-}
 
 func InitMysqlC() {
 	m := global.Config.Mysql
@@ -32,9 +24,9 @@ func InitMysqlC() {
 	global.MDBC = db
 
 	//set Pool
-	SetPool()
+	SetPoolC()
 	//migrate tables
-	migrateTables()
+	// migrateTables()
 	// generate table dao
 	// GenTableDAO()
 	global.Logger.Info("Mysql connection pool and tables migration completed successfully")
@@ -42,13 +34,14 @@ func InitMysqlC() {
 
 func SetPoolC() {
 	m := global.Config.Mysql
-	sqlDb, err := global.MDB.DB()
-	if err != nil {
-		fmt.Printf("Mysql error:: %s", err)
-	}
-	sqlDb.SetConnMaxIdleTime(time.Duration(m.MaxIdleConns))
-	sqlDb.SetMaxOpenConns(m.MaxOpenConns)
-	sqlDb.SetConnMaxLifetime(time.Duration(m.ConnMaxLifetime))
+	// sqlDb, err := global.MDBC.DB()
+	// if err != nil {
+	// 	fmt.Printf("Mysql error:: %s", err)
+	// }
+	global.MDBC.SetMaxIdleConns(m.MaxIdleConns)
+	global.MDBC.SetMaxOpenConns(m.MaxOpenConns)
+	global.MDBC.SetConnMaxLifetime(time.Duration(m.ConnMaxLifetime) * time.Second)
+	global.MDBC.SetConnMaxIdleTime(time.Duration(m.ConnMaxIdleTime) * time.Second)
 
 }
 

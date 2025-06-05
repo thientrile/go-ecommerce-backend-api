@@ -5,6 +5,7 @@ type Config struct {
 	Mysql  MSQLSetting   `mapstruct:"mysql"`
 	Logger LoggerSetting `mapstruct:"logger"`
 	Redis  RedisSetting  `mapstruct:"redis"`
+	Kafka  KafkaSetting  `mapstruct:"kafka"`
 }
 
 type ServerSetting struct {
@@ -29,6 +30,7 @@ type MSQLSetting struct {
 	MaxIdleConns    int    `mapstruct:"maxIdleConns"`
 	MaxOpenConns    int    `mapstruct:"maxOpenConns"`
 	ConnMaxLifetime int    `mapstruct:"connMaxLifetime"`
+	ConnMaxIdleTime int    `mapstruct:"connMaxIdleTime"`
 }
 
 type LoggerSetting struct {
@@ -39,4 +41,14 @@ type LoggerSetting struct {
 	Max_backups   int    `mapstruct:"max_backups"`
 	Max_age       int    `mapstruct:"max_age"`
 	Compress      bool   `mapstruct:"compress"`
+}
+
+type KafkaSetting struct {
+	Host  string `mapstruct:"host"`
+	Port  int    `mapstruct:"port"`
+	Topic struct {
+		Product string `mapstruct:"product"`
+		Order   string `mapstruct:"order"`
+		Auth    string `mapstruct:"auth"`
+	} `mapstruct:"topic"`
 }

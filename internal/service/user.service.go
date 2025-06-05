@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -76,11 +77,21 @@ func (us *userService) Regisger(email string, purpose string) int {
 		return response.ErrInvalidOTP
 	}
 	// 4. send Email OTP
-	err = sendto.SendTemplateEmailOtp([]string{email}, "thientrile2003@gmail.com", "otp-auth.html", map[string]interface{}{
-		"otp":                strconv.Itoa(otp),
-		"expiration_minutes": expirationMinutes,
-	})
+	// err = sendto.SendTemplateEmailOtp([]string{email}, "thientrile2003@gmail.com", "otp-auth.html", map[string]interface{}{
+	// 	"otp":                strconv.Itoa(otp),
+	// 	"expiration_minutes": expirationMinutes,
+	// })
+	// if err != nil {
+	// 	return response.ErrCodeSendEmailOtp
+	// }
+	// send OTP via Kafka
+	body := make (map[string]interface{})
+	body["otp"] = strconv.Itoa(otp)
+	body["email"] = email
+	bodyRequest, _ := json.Marshal(body)
+	err = sendto.SendMessageToKafka("otp-auth", string(bodyRequest))
 	if err != nil {
+		fmt.Printf("Error sending message to Kafka: %v\n", err)
 		return response.ErrCodeSendEmailOtp
 	}
 	return response.ErrCodeSuccess
