@@ -1,6 +1,8 @@
 package initialize
 
 import (
+	// "fmt"
+
 	"fmt"
 
 	"go-ecommerce-backend-api.com/global"
@@ -29,5 +31,9 @@ func Run() {
 	// initialize router
 	r := InitRouter()
 
-	r.Run(fmt.Sprintf(":%v", s.Port)) // Start the server on port 8080
+	// init swagger
+	r = InitSwagger(r)
+	// r.Run(":8002") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run(fmt.Sprintf(":%v", s.Port))
+
 }

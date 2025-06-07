@@ -27,7 +27,7 @@ build:
 	go build -o ./bin/$(APP_NAME) ./cmd/$(APP_NAME)/
 
 # Default target: run app
-dev:
+dev: swag
 	@echo "[INFO] Starting development server..."
 	@go run ./cmd/$(APP_NAME)/
 
@@ -116,8 +116,9 @@ sqlgen:
 	@echo "[INFO] Generating SQL files..."
 	@sqlc generate
 	@echo "[SUCCESS] SQL files generated."
-
+swag:
+	swag init -g ./internal/initialize/swag.init.go -o ./cmd/swag/docs
 
 .PHONY: run docker-up docker-down docker-build clean logs \
         dump-schema dump-full goose-up goose-down goose-reset \
-		sqlgen dev goose-create goose-up-by-one
+		sqlgen dev goose-create goose-up-by-one swag

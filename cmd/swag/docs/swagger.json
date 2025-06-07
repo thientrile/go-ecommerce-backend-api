@@ -1,0 +1,114 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server celler server.",
+        "title": "API Documentation Ecommerce Backend",
+        "termsOfService": "github.com/thientrile/go-ecommerce-backend-api",
+        "contact": {
+            "name": "Team TIPGO",
+            "url": "thientrile.github.io",
+            "email": "team@tipgo.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "host": "localhost:8002",
+    "basePath": "/v1/2025",
+    "paths": {
+        "/user/register": {
+            "post": {
+                "description": "Register a new user with OTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts user"
+                ],
+                "summary": "Register user with OTP",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.RegisterInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.RegisterInput": {
+            "type": "object",
+            "required": [
+                "verify_key",
+                "verify_purpose",
+                "verify_type"
+            ],
+            "properties": {
+                "verify_key": {
+                    "type": "string"
+                },
+                "verify_purpose": {
+                    "type": "string"
+                },
+                "verify_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.ErrorResponseData": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "status code",
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "du lieu tra ve"
+                },
+                "message": {
+                    "description": "thong bao loi",
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    },
+    "externalDocs": {
+        "description": "OpenAPI",
+        "url": "https://swagger.io/resources/open-api/"
+    }
+}

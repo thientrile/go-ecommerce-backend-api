@@ -1,0 +1,77 @@
+basePath: /v1/2025
+definitions:
+  model.RegisterInput:
+    properties:
+      verify_key:
+        type: string
+      verify_purpose:
+        type: string
+      verify_type:
+        type: integer
+    required:
+    - verify_key
+    - verify_purpose
+    - verify_type
+    type: object
+  response.ErrorResponseData:
+    properties:
+      code:
+        description: status code
+        type: integer
+      data:
+        description: du lieu tra ve
+      message:
+        description: thong bao loi
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8002
+info:
+  contact:
+    email: team@tipgo.com
+    name: Team TIPGO
+    url: thientrile.github.io
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: github.com/thientrile/go-ecommerce-backend-api
+  title: API Documentation Ecommerce Backend
+  version: 1.0.0
+paths:
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with OTP
+      parameters:
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.RegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Register user with OTP
+      tags:
+      - accounts user
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

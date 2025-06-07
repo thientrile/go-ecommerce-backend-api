@@ -28,6 +28,18 @@ func (c *cUserLogin) Login(ctx *gin.Context) {
 
 }
 
+// User Register documentation
+//
+//	@Summary      Register user with OTP
+//	@Description  Register a new user with OTP
+//	@Tags         accounts user
+//	@Accept       json
+//	@Produce      json
+//	@Param        payload body model.RegisterInput true "payload"
+//	@Success      200  {object}   response.ErrorResponseData
+//	@Failure      400  {object}  response.ErrorResponseData
+//	@Failure      500  {object}  response.ErrorResponseData
+//	@Router      /user/register [post]
 func (c *cUserLogin) Register(ctx *gin.Context) {
 	var params model.RegisterInput
 	if err := ctx.ShouldBind(&params); err != nil {
@@ -36,10 +48,10 @@ func (c *cUserLogin) Register(ctx *gin.Context) {
 		return
 	}
 
-	errCode, err := service.UserLogin().Register(ctx, &params)
+	codeStatus, err := service.UserLogin().Register(ctx, &params)
 	if err != nil {
 		global.Logger.Error("Error register user OTP: ", zap.Error(err))
-		response.ErrorResponse(ctx, errCode, err.Error())
+		response.ErrorResponse(ctx, codeStatus, err.Error())
 		return
 	}
 	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)
