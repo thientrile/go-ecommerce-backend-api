@@ -7,7 +7,6 @@ import (
 	"go-ecommerce-backend-api.com/global"
 )
 
-
 func LoadConfig() {
 	viper := viper.New()
 	viper.AddConfigPath("./configs/") // path to look for the config file in

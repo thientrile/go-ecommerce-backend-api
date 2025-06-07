@@ -1,13 +1,13 @@
+@baseUrl=http://localhost:8002/v1/2025
 
-
-# user regist
+# user register
 
 POST {{baseUrl}}/user/register
 Content-Type: application/json
 
 {
- 
-  "email": "ttri0403@hotmail.com",
-  "purpose":"test"
+  "verify_key": "ttri0403@hotmail.com",
+  "verify_purpose": "test",
+  "verify_type": 1
 }
 

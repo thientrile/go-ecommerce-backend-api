@@ -32,10 +32,12 @@ dev:
 	@go run ./cmd/$(APP_NAME)/
 
 
-run:
-	@echo "[INFO] Starting the application..."
-	docker-up
-	go run ./cmd/$(APP_NAME)/
+# Run app (build + docker-up + run)
+run: docker-up build
+	@echo "[INFO] Running the application..."
+	@./bin/$(APP_NAME)
+
+	
 
 # Start Docker containers
 docker-up:
@@ -92,6 +94,14 @@ dump-full:
 	--add-locks > $(BACKUP_DIR)/$(DB_NAME)_full.sql
 	@echo "[SUCCESS] Full dump saved to $(BACKUP_DIR)/$(DB_NAME)_full.sql"
 # ================== Goose DB Migration ==================
+goose-create:
+	@echo [INFO] Creating new migration file...
+	@set "GOOSE_DRIVER=$(GOOSE_DRIVER)" && \
+	 set "GOOSE_DBSTRING=$(GOOSE_DBSTRING)" && \
+	 goose -dir=$(GOOSE_MIGRATION_DIR) create $(name) sql
+	@echo [SUCCESS] Migration file created in $(GOOSE_MIGRATION_DIR)
+
+
 goose-up:
 	@set GOOSE_DRIVER=$(GOOSE_DRIVER)&& set GOOSE_DBSTRING=$(GOOSE_DBSTRING)&& goose -dir=$(GOOSE_MIGRATION_DIR) up
 
@@ -100,7 +110,8 @@ goose-down:
 
 goose-reset:
 	@set GOOSE_DRIVER=$(GOOSE_DRIVER)&& set GOOSE_DBSTRING=$(GOOSE_DBSTRING)&& goose -dir=$(GOOSE_MIGRATION_DIR) reset
-
+goose-up-by-one:
+	@set GOOSE_DRIVER=$(GOOSE_DRIVER)&& set GOOSE_DBSTRING=$(GOOSE_DBSTRING)&& goose -dir=$(GOOSE_MIGRATION_DIR) up-by-one
 sqlgen:
 	@echo "[INFO] Generating SQL files..."
 	@sqlc generate
@@ -109,4 +120,4 @@ sqlgen:
 
 .PHONY: run docker-up docker-down docker-build clean logs \
         dump-schema dump-full goose-up goose-down goose-reset \
-		sqlgen dev
+		sqlgen dev goose-create goose-up-by-one

@@ -28,11 +28,11 @@ type UserRepository struct {
 func (up *UserRepository) GetUserByEmail(email string) bool {
 	// row := global.MDB.Table(TableNameGoCrmUser).Where("usr_email = ?", email).First(&model.GoCrmUser{}).RowsAffected
 	// return row != NumberNull
-	user, err := up.sqlc.GetUserByEmail(ctx, email)
-	if err != nil {
-		return false
-	}
-	return user.UsrID != 0
+	// user, err := up.sqlc.GetUserByEmail(ctx, email)
+	// if err != nil {
+	// 	return false
+	// }
+	return 0 != 0
 }
 
 func NewUserRepository() IUserRepository {
