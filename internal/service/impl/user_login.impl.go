@@ -54,7 +54,7 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 
 	}
 	if userFound > 0 {
-		return response.ErrCodeUserHasExist, fmt.Errorf("User has already registered")
+		return response.ErrCodeUserHasExist, fmt.Errorf("user has already registered")
 	}
 
 	// create otp
@@ -75,6 +75,8 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 	if err != nil {
 		return response.ErrInvalidOTP, err
 	}
+
+	// 4. check if otp exists in database
 	//6 Send OTP to email
 	switch in.VerifyType {
 	case consts.EMAIL:
@@ -113,9 +115,50 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 
 	return response.ErrCodeSuccess, nil
 }
-func (s *sUserLogin) VerifyOTP(ctx context.Context) error {
+func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out model.VerifyOtpOutput, err error) {
 	// Implement login logic
-	return nil
+
+	//check if user exists in redis
+	hashKey := crypto.GetHash(strings.ToLower(in.VerifyKey))
+
+	// get otp
+	otpFound, err := global.RDB.Get(ctx, utils.GetUserKey(hashKey)).Result()
+	if err != nil {
+		return out, fmt.Errorf("OTP not found or expired, please register again")
+	}
+	countKey := utils.GetUserKey(hashKey) + "_count"
+	if in.VerifyCode != otpFound {
+		// nếu otp không đúng thì tăng số lần thử MAX_COUNT_OTP
+		count, err := global.RDB.Incr(ctx, countKey).Result()
+		if err != nil {
+			return out, fmt.Errorf("failed to increment OTP attempt count: %v", err)
+		}
+		if count > consts.MAX_COUNT_OTP {
+			// If the count exceeds the maximum allowed attempts, delete the OTP key
+			global.RDB.Del(ctx, hashKey)
+			return out, fmt.Errorf("maximum attempts exceeded, please register again")
+		}
+		err = global.RDB.Expire(ctx, countKey, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+		if err != nil {
+			return out, fmt.Errorf("failed to set expiration for OTP attempt count: %v", err)
+		}
+		return out, fmt.Errorf("invalid OTP code, please try again")
+
+	}
+	infoOTP, err := s.r.GetValidOTP(ctx, hashKey)
+	if err != nil {
+		return out, fmt.Errorf("OTP invalid: %v", err)
+	}
+	// update status verify otp
+	err = s.r.UpdateUserVerificationStatus(ctx, hashKey)
+	if err != nil {
+		return out, fmt.Errorf("OTP verification failed: %v", err)
+	}
+	//output
+	out.Token = infoOTP.VerifyKeyHash
+	out.Message = "OTP verified successfully"
+
+	return out, err
 }
 
 func (s *sUserLogin) UpdatePasswordRegister(ctx context.Context) error {

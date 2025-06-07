@@ -13,6 +13,16 @@ definitions:
     - verify_purpose
     - verify_type
     type: object
+  model.VerifyInput:
+    properties:
+      verify_code:
+        type: string
+      verify_key:
+        type: string
+    required:
+    - verify_code
+    - verify_key
+    type: object
   response.ErrorResponseData:
     properties:
       code:
@@ -69,6 +79,36 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponseData'
       summary: Register user with OTP
+      tags:
+      - accounts user
+  /user/verify-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify the OTP sent to the user
+      parameters:
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.VerifyInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Verify OTP for user
       tags:
       - accounts user
 securityDefinitions:

@@ -69,6 +69,52 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/verify-otp": {
+            "post": {
+                "description": "Verify the OTP sent to the user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts user"
+                ],
+                "summary": "Verify OTP for user",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.VerifyInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -88,6 +134,21 @@ const docTemplate = `{
                 },
                 "verify_type": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.VerifyInput": {
+            "type": "object",
+            "required": [
+                "verify_code",
+                "verify_key"
+            ],
+            "properties": {
+                "verify_code": {
+                    "type": "string"
+                },
+                "verify_key": {
+                    "type": "string"
                 }
             }
         },

@@ -72,30 +72,32 @@ func (q *Queries) GetValidOTP(ctx context.Context, verifyKeyHash string) (GetVal
 
 const insertOTPVerify = `-- name: InsertOTPVerify :execresult
 INSERT INTO ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` (
-    ` + "`" + `verify_otp` + "`" + `, 
-    ` + "`" + `verify_key` + "`" + `, 
-    ` + "`" + `verify_key_hash` + "`" + `, 
-    ` + "`" + `verify_type` + "`" + `, 
-    ` + "`" + `is_verified` + "`" + `, 
-    ` + "`" + `is_deleted` + "`" + `, 
-    ` + "`" + `verify_created_at` + "`" + `, 
-    ` + "`" + `verify_updated_at` + "`" + `) 
-VALUES (?, ?, ?, ?, 0, 0, NOW(), NOW())
+    verify_key_hash,
+    verify_otp,
+    verify_key,
+    verify_type,
+    verify_updated_at
+) VALUES (?, ?, ?, ?, NOW())
+ON DUPLICATE KEY UPDATE
+    verify_otp = VALUES(verify_otp),
+    verify_key = VALUES(verify_key),
+    verify_type = VALUES(verify_type),
+    verify_updated_at = NOW()
 `
 
 type InsertOTPVerifyParams struct {
+	VerifyKeyHash string
 	VerifyOtp     string
 	VerifyKey     string
-	VerifyKeyHash string
 	VerifyType    sql.NullInt32
 }
 
 // Insert a new OTP verification record
 func (q *Queries) InsertOTPVerify(ctx context.Context, arg InsertOTPVerifyParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, insertOTPVerify,
+		arg.VerifyKeyHash,
 		arg.VerifyOtp,
 		arg.VerifyKey,
-		arg.VerifyKeyHash,
 		arg.VerifyType,
 	)
 }
