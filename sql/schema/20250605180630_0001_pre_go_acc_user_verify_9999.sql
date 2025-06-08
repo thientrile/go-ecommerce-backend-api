@@ -10,8 +10,8 @@ CREATE TABLE `pre_go_acc_user_verify_9999` (
     `verify_key` VARCHAR(255) NOT NULL,
     `verify_key_hash` VARCHAR(255) NOT NULL,
     `verify_type` INT DEFAULT 1,
-    `is_verified` INT DEFAULT NULL,
-    `is_deleted` INT DEFAULT NULL,
+    `is_verified` INT DEFAULT 0,
+    `is_deleted` INT DEFAULT 0,
     `verify_created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     `verify_updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
 );

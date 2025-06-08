@@ -8,7 +8,19 @@ import (
 	"database/sql"
 )
 
-type PreGoAccUser9999 struct {
+type PreGoAccUserBase9999 struct {
+	UserID         int32
+	UserAccount    string
+	UserPassword   string
+	UserSalt       string
+	UserLoginTime  sql.NullTime
+	UserLogoutTime sql.NullTime
+	UserLoginIp    sql.NullString
+	UserCreatedAt  sql.NullTime
+	UserUpdatedAt  sql.NullTime
+}
+
+type PreGoAccUserInfo9999 struct {
 	// User ID
 	UserID uint64
 	// User account
@@ -33,18 +45,6 @@ type PreGoAccUser9999 struct {
 	CreatedAt sql.NullTime
 	// Record update time
 	UpdatedAt sql.NullTime
-}
-
-type PreGoAccUserBase9999 struct {
-	UserID         int32
-	UserAccount    string
-	UserPassword   string
-	UserSalt       string
-	UserLoginTime  sql.NullTime
-	UserLogoutTime sql.NullTime
-	UserLoginIp    sql.NullString
-	UserCreatedAt  sql.NullTime
-	UserUpdatedAt  sql.NullTime
 }
 
 type PreGoAccUserVerify9999 struct {

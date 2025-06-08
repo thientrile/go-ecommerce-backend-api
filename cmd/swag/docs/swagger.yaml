@@ -13,6 +13,16 @@ definitions:
     - verify_purpose
     - verify_type
     type: object
+  model.UpdatePasswordRegisterInput:
+    properties:
+      password:
+        type: string
+      token:
+        type: string
+    required:
+    - password
+    - token
+    type: object
   model.VerifyInput:
     properties:
       verify_code:
@@ -79,6 +89,36 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponseData'
       summary: Register user with OTP
+      tags:
+      - accounts user
+  /user/update-password-register:
+    post:
+      consumes:
+      - application/json
+      description: Allows a user to set or update their password after registration
+      parameters:
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdatePasswordRegisterInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Update password after registration
       tags:
       - accounts user
   /user/verify-otp:

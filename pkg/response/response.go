@@ -20,6 +20,7 @@ type ErrorResponseData struct {
 // success response
 
 func SuccessResponse(c *gin.Context, code int, data interface{}) {
+	
 	c.JSON(http.StatusOK, ResponseData{
 		Code:    code,
 		Message: msg[code],

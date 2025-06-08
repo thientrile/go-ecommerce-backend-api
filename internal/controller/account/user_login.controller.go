@@ -1,20 +1,45 @@
 package account
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"go-ecommerce-backend-api.com/global"
 	"go-ecommerce-backend-api.com/internal/model"
 	"go-ecommerce-backend-api.com/internal/service"
 	"go-ecommerce-backend-api.com/pkg/response"
+	"go-ecommerce-backend-api.com/pkg/utils"
 	"go.uber.org/zap"
 )
 
 // manager controller login user
 var Login = new(cUserLogin)
 
-type cUserLogin struct {
+// cUserLogin is the controller for user login related actions.
+type cUserLogin struct{}
+
+// UpdatePasswordRegister documentation
+//
+// @Summary      Update password after registration
+// @Description  Allows a user to set or update their password after registration
+// @Tags         accounts user
+// @Accept       json
+// @Produce      json
+// @Param        payload body model.UpdatePasswordRegisterInput true "payload"
+// @Success      200  {object}   response.ErrorResponseData
+// @Failure      400  {object}  response.ErrorResponseData
+// @Failure      500  {object}  response.ErrorResponseData
+// @Router       /user/update-password-register [post]
+func (c *cUserLogin) UpdatePasswordRegister(ctx *gin.Context) {
+	var params model.UpdatePasswordRegisterInput
+	if !utils.CheckValidParams(ctx, &params) {
+		return
+	}
+	codeStatus, err := service.UserLogin().UpdatePasswordRegister(ctx, &params)
+	if err != nil {
+		global.Logger.Error("Error updating password after registration: ", zap.Error(err))
+		response.ErrorResponse(ctx, codeStatus, "")
+		return
+	}
+	response.SuccessResponse(ctx, codeStatus, nil)
 }
 
 /*
@@ -31,6 +56,17 @@ User Login documentation
 @Failure      500  {object}  response.ErrorResponseData
 @Router       /user/login [post]
 */
+func (c *cUserLogin) Login(ctx *gin.Context) {
+	// Implement login logic
+	err := service.UserLogin().Login(ctx)
+	if err != nil {
+
+		response.ErrorResponse(ctx, response.ErrInvalidOTP, err.Error())
+		return
+	}
+	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)
+
+}
 
 // Verify OTP documentation
 //
@@ -46,31 +82,18 @@ User Login documentation
 // @Router       /user/verify-otp [post]
 func (c *cUserLogin) VerifyOTP(ctx *gin.Context) {
 	var params model.VerifyInput
-	if err := ctx.ShouldBind(&params); err != nil {
-		fmt.Println("Error binding params: ", err)
-		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+	if !utils.CheckValidParams(ctx, &params) {
 		return
 	}
 
 	payload, err := service.UserLogin().VerifyOTP(ctx, &params)
 	if err != nil {
 		global.Logger.Error("Error verifying OTP: ", zap.Error(err))
-		response.ErrorResponse(ctx, response.ErrInvalidOTP, err.Error())
+		response.ErrorResponse(ctx, response.ErrInvalidOTP, "")
 		return
 	}
 
 	response.SuccessResponse(ctx, response.ErrCodeSuccess, payload)
-}
-
-func (c *cUserLogin) Login(ctx *gin.Context) {
-	// Implement login logic
-	err := service.UserLogin().Login(ctx)
-	if err != nil {
-		response.ErrorResponse(ctx, response.ErrInvalidOTP, err.Error())
-		return
-	}
-	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)
-
 }
 
 // User Register documentation
@@ -87,16 +110,13 @@ func (c *cUserLogin) Login(ctx *gin.Context) {
 //	@Router      /user/register [post]
 func (c *cUserLogin) Register(ctx *gin.Context) {
 	var params model.RegisterInput
-	if err := ctx.ShouldBind(&params); err != nil {
-		fmt.Println("Error binding params: ", err)
-		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+	if !utils.CheckValidParams(ctx, &params) {
 		return
 	}
-
 	codeStatus, err := service.UserLogin().Register(ctx, &params)
 	if err != nil {
 		global.Logger.Error("Error register user OTP: ", zap.Error(err))
-		response.ErrorResponse(ctx, codeStatus, err.Error())
+		response.ErrorResponse(ctx, codeStatus, "")
 		return
 	}
 	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)

@@ -1,10 +1,10 @@
 -- +goose Up
 -- +goose StatementBegin
-DROP TABLE IF EXISTS `pre_go_acc_user_9999`;
+DROP TABLE IF EXISTS `pre_go_acc_user_info_9999`;
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE TABLE `pre_go_acc_user_9999` (
+CREATE TABLE `pre_go_acc_user_info_9999` (
     `user_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'User ID',
     `user_account` VARCHAR(255) NOT NULL COMMENT 'User account',
     `user_nickname` VARCHAR(255) DEFAULT NULL COMMENT 'User nickname',
@@ -21,15 +21,15 @@ CREATE TABLE `pre_go_acc_user_9999` (
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-ALTER TABLE `pre_go_acc_user_9999` 
-    ADD UNIQUE `pre_go_acc_user_9999_user_account_unique`(`user_account`),
-    ADD INDEX `pre_go_acc_user_9999_user_state_index`(`user_state`),
-    ADD INDEX `pre_go_acc_user_9999_user_mobile_index`(`user_mobile`),
-    ADD INDEX `pre_go_acc_user_9999_user_email_index`(`user_email`),
-    ADD INDEX `pre_go_acc_user_9999_user_is_authentication_index`(`user_is_authentication`);
+ALTER TABLE `pre_go_acc_user_info_9999` 
+    ADD UNIQUE `pre_go_acc_user_info_9999_user_account_unique`(`user_account`),
+    ADD INDEX `pre_go_acc_user_info_9999_user_state_index`(`user_state`),
+    ADD INDEX `pre_go_acc_user_info_9999_user_mobile_index`(`user_mobile`),
+    ADD INDEX `pre_go_acc_user_info_9999_user_email_index`(`user_email`),
+    ADD INDEX `pre_go_acc_user_info_9999_user_is_authentication_index`(`user_is_authentication`);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS `pre_go_acc_user_9999`;
+DROP TABLE IF EXISTS `pre_go_acc_user_info_9999`;
 -- +goose StatementEnd

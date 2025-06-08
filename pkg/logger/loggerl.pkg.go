@@ -17,8 +17,7 @@ type LoggerZap struct {
 
 func NewLogger(config setting.LoggerSetting) *LoggerZap {
 	loglevel := config.Log_Level
-	fmt.Print("Log level: ", loglevel, "\n")
-	// debug, info, warn, error, dpanic, panic, fatal
+		// debug, info, warn, error, dpanic, panic, fatal
 	var level zapcore.Level
 	switch loglevel {
 	case "debug":

@@ -28,3 +28,8 @@ WHERE user_account = ? AND user_password = ?;
 UPDATE pre_go_acc_user_base_9999
 SET user_logout_time = NOW()
 WHERE user_account = ?;
+
+-- name: UpdatePassword :exec
+UPDATE pre_go_acc_user_base_9999
+SET user_password = ?
+WHERE user_id = ?;

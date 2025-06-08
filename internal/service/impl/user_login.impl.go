@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -95,6 +96,20 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 		{
 			return response.ErrCodeSuccess, nil
 		}
+
+	default:
+		{
+			body := make(map[string]interface{})
+			body["type"] = in.VerifyType
+			body["otp"] = strconv.Itoa(optNew)
+			body["email"] = in.VerifyKey
+			bodyRequest, _ := json.Marshal(body)
+			err = sendto.SendMessageToKafka("otp-auth", string(bodyRequest))
+			if err != nil {
+				fmt.Printf("Error sending message to Kafka: %v\n", err)
+				return response.ErrCodeSendEmailOtp, err
+			}
+		}
 	}
 	// 7. save user to database
 	result, err := s.r.InsertOTPVerify(ctx, database.InsertOTPVerifyParams{
@@ -120,13 +135,13 @@ func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out 
 
 	//check if user exists in redis
 	hashKey := crypto.GetHash(strings.ToLower(in.VerifyKey))
-
+	userKey := utils.GetUserKey(hashKey)
 	// get otp
-	otpFound, err := global.RDB.Get(ctx, utils.GetUserKey(hashKey)).Result()
+	otpFound, err := global.RDB.Get(ctx, userKey).Result()
 	if err != nil {
 		return out, fmt.Errorf("OTP not found or expired, please register again")
 	}
-	countKey := utils.GetUserKey(hashKey) + "_count"
+	countKey := userKey + "_count"
 	if in.VerifyCode != otpFound {
 		// nếu otp không đúng thì tăng số lần thử MAX_COUNT_OTP
 		count, err := global.RDB.Incr(ctx, countKey).Result()
@@ -135,16 +150,24 @@ func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out 
 		}
 		if count > consts.MAX_COUNT_OTP {
 			// If the count exceeds the maximum allowed attempts, delete the OTP key
-			global.RDB.Del(ctx, hashKey)
+			global.RDB.Del(ctx, userKey)
 			return out, fmt.Errorf("maximum attempts exceeded, please register again")
 		}
-		err = global.RDB.Expire(ctx, countKey, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+		if count == 1 {
+			err = global.RDB.Expire(ctx, countKey, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+			if err != nil {
+				return out, fmt.Errorf("failed to set expiration for OTP: %v", err)
+			}
+		}
 		if err != nil {
 			return out, fmt.Errorf("failed to set expiration for OTP attempt count: %v", err)
 		}
 		return out, fmt.Errorf("invalid OTP code, please try again")
 
 	}
+	global.RDB.Del(ctx, userKey)
+	// global.RDB.Del(ctx, countKey) // Reset the count if OTP is correct
+	fmt.Printf("OTP found: %s\n", hashKey)
 	infoOTP, err := s.r.GetValidOTP(ctx, hashKey)
 	if err != nil {
 		return out, fmt.Errorf("OTP invalid: %v", err)
@@ -161,7 +184,61 @@ func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out 
 	return out, err
 }
 
-func (s *sUserLogin) UpdatePasswordRegister(ctx context.Context) error {
+func (s *sUserLogin) UpdatePasswordRegister(ctx context.Context, in *model.UpdatePasswordRegisterInput) (codeStatus int, err error) {
 	// Implement login logic
-	return nil
+	infoOTP, err := s.r.GetInfoOTP(ctx, in.Token)
+	fmt.Printf("infoOTP: %+v\n", infoOTP)
+	if err != nil {
+		return response.ErrCodeUserOtpNotExist, fmt.Errorf("OTP does not exist or is invalid: %v", err)
+	}
+	if infoOTP.IsVerified.Int32 == 0 {
+		return response.ErrCodeUserOtpNotExist, fmt.Errorf("OTP exists but is not valid, please register again")
+	}
+	// update user base
+	userBase := database.AddUserBaseParams{}
+	userBase.UserAccount = infoOTP.VerifyKey
+	userBase.UserPassword = crypto.GetHash(in.Password)
+	userSalt, err := crypto.GenerateSalt(16)
+	if err != nil {
+		return response.ErrCodeUserOtpNotExist, err
+	}
+	userBase.UserSalt = userSalt
+	userBase.UserPassword = crypto.HashPassword(in.Password, userSalt)
+	// add userBase to user_base table
+	NewUserBase, err := s.r.AddUserBase(ctx, userBase)
+	if err != nil {
+		return response.ErrCodeUserHasExist, fmt.Errorf("failed to add user base: %v", err)
+	}
+	lastIdVerify, err := NewUserBase.LastInsertId()
+	if err != nil {
+		return response.ErrCodeUserHasExist, err
+	}
+	userInfo := database.AddUserHaveUserIdParams{
+		UserID:               uint64(lastIdVerify),
+		UserAccount:          infoOTP.VerifyKey,
+		UserNickname:         sql.NullString{String: utils.GenerateNickname(), Valid: true},
+		UserAvatar:           sql.NullString{String: consts.USER_AVATAR_DEFAULT, Valid: true},
+		UserState:            1,
+		UserGender:           sql.NullInt16{Int16: 0, Valid: true},
+		UserBirthday:         sql.NullTime{Time: time.Now(), Valid: true},
+		UserIsAuthentication: uint8(1), // 1 for authenticated
+	}
+	switch infoOTP.VerifyType.Int32 {
+	case int32(consts.EMAIL):
+		{
+
+			userInfo.UserEmail = sql.NullString{String: infoOTP.VerifyKey, Valid: true}
+		}
+	case int32(consts.MOBILE):
+		{
+			userInfo.UserMobile = sql.NullString{String: infoOTP.VerifyKey, Valid: true}
+		}
+	}
+	// update user info by id
+	_, err = s.r.AddUserHaveUserId(ctx, userInfo)
+	if err != nil {
+		
+		return response.ErrCodeUserHasExist, err
+	}
+	return response.ErrCodeSuccess, nil
 }

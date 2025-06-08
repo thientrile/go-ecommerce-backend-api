@@ -23,9 +23,10 @@ func (pr *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
 	userRouterPublic := Router.Group("/user")
 	{
 		// userRouterPublic.POST("/register",useHandlerNoDependency.Regisger) // Register a new user -> Yes ->No
-		userRouterPublic.POST("/register", account.Login.Register)    // Register a new user -> Yes ->No
-		userRouterPublic.POST("/login", account.Login.Login)          // Register a new user -> Yes ->No
-		userRouterPublic.POST("/verify-otp", account.Login.VerifyOTP) // Verify OTP for user -> Yes ->No
+		userRouterPublic.POST("/register", account.Login.Register)                               // Register a new user -> Yes ->No
+		userRouterPublic.POST("/login", account.Login.Login)                                     // Register a new user -> Yes ->No
+		userRouterPublic.POST("/verify-otp", account.Login.VerifyOTP)                            // Verify OTP for user -> Yes ->No
+		userRouterPublic.POST("/update-password-register", account.Login.UpdatePasswordRegister) // Verify OTP for user -> Yes ->No
 	}
 
 	// private router

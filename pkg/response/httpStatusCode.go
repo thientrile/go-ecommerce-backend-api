@@ -9,7 +9,8 @@ const (
 	// register
 	ErrCodeUserHasExist = 50001 // User has exist
 	// login
-	ErrCodeOtpNotExist = 60000 // OTP does not exist
+	ErrCodeOtpNotExist     = 60000 // OTP does not exist
+	ErrCodeUserOtpNotExist = 60008 // OTP exists but is not valid
 )
 
 var msg = map[int]string{
@@ -20,5 +21,6 @@ var msg = map[int]string{
 	ErrCodeUserHasExist: "User has exist",
 	ErrCodeSendEmailOtp: "Failed to send email OTP",
 	// login
-	ErrCodeOtpNotExist: "OTP exists but is not valid",
+	ErrCodeOtpNotExist:     "OTP exists but is not valid",
+	ErrCodeUserOtpNotExist: "OTP does not exist",
 }
