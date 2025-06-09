@@ -1,5 +1,15 @@
 basePath: /v1/2025
 definitions:
+  model.LoginInput:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
   model.RegisterInput:
     properties:
       verify_key:
@@ -61,6 +71,36 @@ info:
   title: API Documentation Ecommerce Backend
   version: 1.0.0
 paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login user and return authentication token
+      parameters:
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: User login with credentials
+      tags:
+      - accounts user
   /user/register:
     post:
       consumes:

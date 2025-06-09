@@ -16,9 +16,11 @@ import (
 	"go-ecommerce-backend-api.com/internal/model"
 	"go-ecommerce-backend-api.com/pkg/response"
 	"go-ecommerce-backend-api.com/pkg/utils"
+	"go-ecommerce-backend-api.com/pkg/utils/auth"
 	"go-ecommerce-backend-api.com/pkg/utils/crypto"
 	"go-ecommerce-backend-api.com/pkg/utils/random"
 	"go-ecommerce-backend-api.com/pkg/utils/sendto"
+	"go.uber.org/zap"
 )
 
 type sUserLogin struct {
@@ -32,12 +34,81 @@ func NewUserLoginImpl(r *database.Queries) *sUserLogin {
 		r: r,
 	}
 }
+// ---- Two-Factor Authentication ----
+func (s *sUserLogin) IsTwoFactorEnabled(ctx context.Context, userId int64) (codeStatus int, rs bool, err error) {
+	// Check if two-factor authentication is enabled for the user
+	
+	return response.ErrCodeSuccess,true, nil
+}
 
+
+func (s *sUserLogin) SetupTwoFactorAuth(ctx context.Context, in *model.SetupTwoFactorAuthInput) (codeStatus int, err error) {
+	// Implement logic to set up two-factor authentication for the user
+	// This could involve generating a secret key and saving it in the database
+	// For example, you might use a library like "github.com/pquerna/otp" to generate a TOTP secret
+	return response.ErrCodeSuccess, nil
+}
+
+
+func (s *sUserLogin) VerifyTwoFactorAuth(ctx context.Context, in *model.TwoFactorVerifycationInput) (codeStatus int, err error) {
+	// Implement logic to verify the two-factor authentication code provided by the user
+	// This could involve checking the code against the secret key stored in the database
+	// For example, you might use a library like "github.com/pquerna/otp" to verify a TOTP code
+	return response.ErrCodeSuccess, nil
+}
+
+
+
+// ---- End of Two-Factor Authentication ----
 // Implement the methods of IUserLogin interface here
 
-func (s *sUserLogin) Login(ctx context.Context) error {
+func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatus int, out model.LoginOutput, err error) {
 	// Implement login logic
-	return nil
+	// check if user exists in user base
+	userBaseFound, err := s.r.GetOneUserInfo(ctx, in.Username)
+	if err != nil {
+		return response.ErrCodeAuthenticationFailed, out, nil
+	}
+	// check password
+	if !crypto.MatchingPassword(userBaseFound.UserPassword, in.Password, userBaseFound.UserSalt) {
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("does not match password")
+	}
+	// 3 check two factor authentication
+
+	//4. update password time
+	go s.r.LoginUserBase(ctx, database.LoginUserBaseParams{
+		UserAccount:  in.Username,
+		UserPassword: in.Password,
+		UserLoginIp:  sql.NullString{String: "127.0.0.1", Valid: true},
+	})
+	// 5 create UUID
+	subToken := utils.GenerateUUID(int(userBaseFound.UserID))
+	// 6. get user info
+	userInfo, err := s.r.GetUser(ctx, uint64(userBaseFound.UserID))
+	if err != nil {
+		global.Logger.Error("Error getting user info: ", zap.Error(err))
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to get user info: %v", err)
+	}
+	// 7. conver to json
+	infoUserJson, err := json.Marshal(userInfo)
+	if err != nil {
+
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to marshal user info: %v", err)
+	}
+	// 8. give infoUser to redis with key =subToken
+	err = global.RDB.Set(ctx, subToken, infoUserJson, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+	if err != nil {
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to set user info in Redis: %v", err)
+	}
+	// 9. create token
+	tokenObj, err := auth.CreateToken(subToken)
+	if err != nil {
+		return response.ErrCodeAuthenticationFailed, out, err
+	}
+	out.Token.AccessToken = tokenObj.AccessToken
+	out.Token.RefreshToken = tokenObj.RefreshToken
+	out.Message = "Login successful"
+	return response.ErrCodeSuccess, out, nil
 }
 
 func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (codeResult int, err error) {
@@ -237,7 +308,7 @@ func (s *sUserLogin) UpdatePasswordRegister(ctx context.Context, in *model.Updat
 	// update user info by id
 	_, err = s.r.AddUserHaveUserId(ctx, userInfo)
 	if err != nil {
-		
+
 		return response.ErrCodeUserHasExist, err
 	}
 	return response.ErrCodeSuccess, nil

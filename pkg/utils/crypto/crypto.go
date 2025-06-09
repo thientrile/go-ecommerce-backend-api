@@ -33,3 +33,10 @@ func HashPassword(password, salt string) string {
 	hashed := sha256.Sum256([]byte(password + salt))
 	return hex.EncodeToString(hashed[:])
 }
+
+
+// verifyPassword checks if the provided password matches the hashed password with the given salt.
+func MatchingPassword(storeHash string, password string, salt string) bool {
+	hashPassword := HashPassword(password, salt)
+	return storeHash == hashPassword
+}

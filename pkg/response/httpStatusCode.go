@@ -11,6 +11,10 @@ const (
 	// login
 	ErrCodeOtpNotExist     = 60000 // OTP does not exist
 	ErrCodeUserOtpNotExist = 60008 // OTP exists but is not valid
+	ErrCodeUserNotExist    = 60009 // User does not exist
+	//authentication
+	ErrCodeAuthenticationFailed = 60010 // Authentication failed
+	ErrCodeAuthenticationSuccess = 60011 // Authentication success
 )
 
 var msg = map[int]string{
@@ -23,4 +27,8 @@ var msg = map[int]string{
 	// login
 	ErrCodeOtpNotExist:     "OTP exists but is not valid",
 	ErrCodeUserOtpNotExist: "OTP does not exist",
+	ErrCodeUserNotExist:    "User does not exist",
+	// authentication
+	ErrCodeAuthenticationFailed:   "Authentication failed",
+	ErrCodeAuthenticationSuccess: "Authentication success",
 }

@@ -6,6 +6,7 @@ type Config struct {
 	Logger LoggerSetting `mapstruct:"logger"`
 	Redis  RedisSetting  `mapstruct:"redis"`
 	Kafka  KafkaSetting  `mapstruct:"kafka"`
+	JWT    JWTSetting    `mapstruct:"jwt"`
 }
 
 type ServerSetting struct {
@@ -51,4 +52,12 @@ type KafkaSetting struct {
 		Order   string `mapstruct:"order"`
 		Auth    string `mapstruct:"auth"`
 	} `mapstruct:"topic"`
+}
+
+// JWTSetting holds the configuration for JWT authentication.
+type JWTSetting struct {
+	TokenHourLifespan int    `mapstruct:"TOKEN_HOUR_LIFETIME"`
+	JwtExpiration     string `mapstruct:"JWT_EXPIRATION"`
+	ApiSecret         string `mapstruct:"API_SECRET"`
+	Issuer            string `mapstruct:"ISSUER"`
 }

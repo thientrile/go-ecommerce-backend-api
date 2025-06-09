@@ -116,3 +116,13 @@
 {"level":"INFO","time":"2025-06-09T02:19:39.292+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
 {"level":"INFO","time":"2025-06-09T02:21:21.204+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
 {"level":"INFO","time":"2025-06-09T02:21:21.214+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
+{"level":"INFO","time":"2025-06-09T03:54:27.823+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-09T03:54:27.839+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
+{"level":"INFO","time":"2025-06-09T03:56:41.907+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-09T03:56:41.916+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
+{"level":"INFO","time":"2025-06-09T03:57:37.808+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-09T03:57:37.822+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
+{"level":"INFO","time":"2025-06-09T03:58:47.794+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-09T03:58:47.804+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}
+{"level":"INFO","time":"2025-06-09T04:03:03.022+0700","caller":"initialize/run.go:19","msg":"config log ok!!","status":"success"}
+{"level":"INFO","time":"2025-06-09T04:03:03.031+0700","caller":"initialize/mysqlc.init.go:31","msg":"✅ MySQL connection pool initialized successfully"}

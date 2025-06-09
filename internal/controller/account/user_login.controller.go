@@ -42,29 +42,31 @@ func (c *cUserLogin) UpdatePasswordRegister(ctx *gin.Context) {
 	response.SuccessResponse(ctx, codeStatus, nil)
 }
 
-/*
-User Login documentation
-
-@Summary      User login with credentials
-@Description  Login user and return authentication token
-@Tags         accounts user
-@Accept       json
-@Produce      json
-@Param        payload body model.LoginInput true "payload"
-@Success      200  {object}   response.ErrorResponseData
-@Failure      400  {object}  response.ErrorResponseData
-@Failure      500  {object}  response.ErrorResponseData
-@Router       /user/login [post]
-*/
+// User Login documentation
+//
+// @Summary      User login with credentials
+// @Description  Login user and return authentication token
+// @Tags         accounts user
+// @Accept       json
+// @Produce      json
+// @Param        payload body model.LoginInput true "payload"
+// @Success      200  {object}   response.ErrorResponseData
+// @Failure      400  {object}  response.ErrorResponseData
+// @Failure      500  {object}  response.ErrorResponseData
+// @Router       /user/login [post]
 func (c *cUserLogin) Login(ctx *gin.Context) {
 	// Implement login logic
-	err := service.UserLogin().Login(ctx)
-	if err != nil {
-
-		response.ErrorResponse(ctx, response.ErrInvalidOTP, err.Error())
+	var params model.LoginInput
+	if !utils.CheckValidParams(ctx, &params) {
 		return
 	}
-	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)
+	codeStatus, payload, err := service.UserLogin().Login(ctx, &params)
+	if err != nil {
+		global.Logger.Error("Error login user: ", zap.Error(err))
+		response.ErrorResponse(ctx, codeStatus, "")
+		return
+	}
+	response.SuccessResponse(ctx, response.ErrCodeSuccess, payload)
 
 }
 

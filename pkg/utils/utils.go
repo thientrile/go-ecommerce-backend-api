@@ -3,9 +3,12 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"go-ecommerce-backend-api.com/pkg/response"
 )
@@ -44,4 +47,13 @@ func CheckValidParams(ctx *gin.Context, params interface{}) bool {
 func GenerateNickname() string {
 	rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf("user_%06d", rand.Intn(1000000))
+}
+
+// generate uuid
+func GenerateUUID(userId int) string {
+	newUUID := uuid.New()
+	text := fmt.Sprintf("*%d*", userId)
+	// Convert UUID to string
+	uuidString := strings.ReplaceAll(newUUID.String(), "-", text)
+	return strconv.Itoa(userId) + "_" + uuidString
 }

@@ -5,7 +5,7 @@ const (
 	MOBILE int = 2
 	KAFKA  int = 3
 
-	TIME_OTP_REGISTER   int    = 5
-	MAX_COUNT_OTP       int64  = 5
+	TIME_OTP_REGISTER   int    = 1
+	MAX_COUNT_OTP       int64  = 1
 	USER_AVATAR_DEFAULT string = "profile.png" // Default avatar for user
 )
