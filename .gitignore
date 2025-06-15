@@ -1,3 +1,4 @@
 log/*
 configs/product.yaml
 ./storage/logs
+./bin/*
