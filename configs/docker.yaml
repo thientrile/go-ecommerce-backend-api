@@ -1,5 +1,6 @@
 server:
   port: 8002
+  domain: "crm.shopdev.com"
   mode: dev # Chế độ chạy: dev, prod
 mysql:
   host: go-ecommerce-mysql #127.0.0.1
@@ -32,3 +33,13 @@ kafka:
     product: "product-topic"
     order: "order-topic"
     auth: "otp-auth-topic"
+jwt:
+  TOKEN_HOUR_LIFETIME: 1 # Thời gian sống của token (giờ)
+  JWT_EXPIRATION: 1h
+  API_SECRET: "b7f8e2c9d4a1f6e3b5c7a9d2e4f6b8c1a3e5d7c9b1f3a5e7c2d4b6a8f0e2c4d6"
+  JWT_ISSUER: "go-ecommerce"
+SMTP:
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  smtp_username: "thientrile2003@gmail.com"
+  smtp_password: "tiok zown both uqiq"

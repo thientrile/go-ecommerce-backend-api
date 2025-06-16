@@ -2,6 +2,8 @@ FROM golang:alpine AS builder
 
 WORKDIR /build
 COPY . .
+# # Set environment
+ENV ENV=docker
 
 RUN go mod download
 
@@ -12,4 +14,4 @@ FROM scratch
 COPY ./configs /configs
 COPY --from=builder /build/crm.shopdev.com /
 
-ENTRYPOINT ["/crm.shopdev.com", "configs/local.yaml"]
+ENTRYPOINT ["/crm.shopdev.com", "configs/docker.yaml"]

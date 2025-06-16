@@ -1,4 +1,3 @@
-basePath: /v1/2025
 definitions:
   model.LoginInput:
     properties:
@@ -54,22 +53,8 @@ definitions:
         description: thong bao loi
         type: string
     type: object
-externalDocs:
-  description: OpenAPI
-  url: https://swagger.io/resources/open-api/
-host: localhost:8002
 info:
-  contact:
-    email: team@tipgo.com
-    name: Team TIPGO
-    url: thientrile.github.io
-  description: This is a sample server celler server.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: github.com/thientrile/go-ecommerce-backend-api
-  title: API Documentation Ecommerce Backend
-  version: 1.0.0
+  contact: {}
 paths:
   /user/login:
     post:
@@ -191,7 +176,4 @@ paths:
       summary: Verify OTP for user
       tags:
       - accounts user
-securityDefinitions:
-  BasicAuth:
-    type: basic
 swagger: "2.0"

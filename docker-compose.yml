@@ -1,11 +1,14 @@
 # version: "3.9"
 name: go-ecommerce-backend-api
 services:
+  # Go Backend Container - chỉ chạy trong production mode
   crm.shopdev.com:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: go-ecommerce-backend
+    environment:
+      - ENV=docker
     command: ["/crm.shopdev.com", "configs/local.yaml"]
     volumes:
       - ./configs:/configs
@@ -21,6 +24,8 @@ services:
     networks:
       - go-ecommerce-network
     restart: unless-stopped
+    profiles:
+      - prod
 
   mysql:
     image: mysql:8.0
@@ -115,7 +120,6 @@ services:
     networks:
       - go-ecommerce-network
     restart: unless-stopped
-
   debezium:
     image: quay.io/debezium/connect:3.1.2.Final
     container_name: go-ecommerce-debezium
@@ -142,6 +146,55 @@ services:
     networks:
       - go-ecommerce-network
     restart: unless-stopped
+  # Nginx for Production - proxy to container
+  nginx-prod:
+    image: nginx:alpine
+    container_name: go-ecommerce-nginx-prod
+    depends_on:
+      - crm.shopdev.com
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d/docker.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - go-ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - prod
+
+  # Nginx for Development - proxy to host
+  nginx-dev:
+    image: nginx:alpine
+    container_name: go-ecommerce-nginx-dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - go-ecommerce-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - dev
 
 
 volumes:

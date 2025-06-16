@@ -3,6 +3,7 @@ package initialize
 import (
 	"github.com/gin-gonic/gin"
 	"go-ecommerce-backend-api.com/global"
+	"go-ecommerce-backend-api.com/internal/middlewares"
 	"go-ecommerce-backend-api.com/internal/routers"
 )
 
@@ -13,7 +14,10 @@ func InitRouter() *gin.Engine {
 	if s.Mode == "dev" {
 		gin.SetMode(gin.DebugMode)
 		gin.ForceConsoleColor()
-		r = gin.Default()
+		r = gin.New()
+		// Use custom colored logger instead of default
+		r.Use(middlewares.ColorLogger())
+		r.Use(gin.Recovery())
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 		r = gin.New()
@@ -41,6 +45,8 @@ func InitRouter() *gin.Engine {
 		managerRouter.InitUserRouter(MainGroup)
 		managerRouter.InitAdminRouter(MainGroup)
 	}
+
+	// Initialize Swagger documentation
 
 	return r
 }

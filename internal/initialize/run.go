@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"go-ecommerce-backend-api.com/global"
+	"go-ecommerce-backend-api.com/internal/middlewares"
 	"go.uber.org/zap"
 )
 
@@ -14,6 +15,9 @@ func Run() {
 	// load configuration
 	LoadConfig()
 	s := global.Config.Server
+	// Display startup banner
+	middlewares.StartupBanner(fmt.Sprintf("%v", s.Port), s.Domain)
+
 	// initialize logger
 	InitLogger()
 	global.Logger.Info("config log ok!!", zap.String("status", "success"))
@@ -30,9 +34,9 @@ func Run() {
 	InitKafka()
 	// initialize router
 	r := InitRouter()
-
 	// init swagger
 	r = InitSwagger(r)
+
 	// r.Run(":8002") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	r.Run(fmt.Sprintf(":%v", s.Port))
 

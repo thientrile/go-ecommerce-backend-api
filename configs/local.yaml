@@ -1,4 +1,5 @@
 server:
+  domain: "crm.shopdev.test"
   port: 8002
   mode: dev # Chế độ chạy: dev, prod
 mysql:
@@ -31,7 +32,12 @@ kafka:
   topic:
     product: "product-topic"
     order: "order-topic"
-    auth: "otp-auth-topic"    
+    auth: "otp-auth-topic"
+SMTP:
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  smtp_username: "thientrile2003@gmail.com"
+  smtp_password: "tiok zown both uqiq"     
 jwt:
   TOKEN_HOUR_LIFETIME: 1 # Thời gian sống của token (giờ)
   JWT_EXPIRATION: 1h

@@ -1,22 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server celler server.",
-        "title": "API Documentation Ecommerce Backend",
-        "termsOfService": "github.com/thientrile/go-ecommerce-backend-api",
-        "contact": {
-            "name": "Team TIPGO",
-            "url": "thientrile.github.io",
-            "email": "team@tipgo.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "1.0.0"
+        "contact": {}
     },
-    "host": "localhost:8002",
-    "basePath": "/v1/2025",
     "paths": {
         "/user/login": {
             "post": {
@@ -284,14 +270,5 @@
                 }
             }
         }
-    },
-    "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
-        }
-    },
-    "externalDocs": {
-        "description": "OpenAPI",
-        "url": "https://swagger.io/resources/open-api/"
     }
 }

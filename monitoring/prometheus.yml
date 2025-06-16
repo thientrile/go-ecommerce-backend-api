@@ -1,0 +1,44 @@
+# Prometheus configuration for Go E-commerce Backend API monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Nginx metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Go application metrics (if you add prometheus metrics to your Go app)
+  - job_name: 'go-ecommerce-api'
+    static_configs:
+      - targets: ['crm.shopdev.com:8001']
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # MySQL metrics (if mysql_exporter is added)
+  # - job_name: 'mysql'
+  #   static_configs:
+  #     - targets: ['mysql-exporter:9104']
+
+  # Redis metrics (if redis_exporter is added)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+
+  # Kafka metrics (if kafka_exporter is added)
+  # - job_name: 'kafka'
+  #   static_configs:
+  #     - targets: ['kafka-exporter:9308']

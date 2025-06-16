@@ -12,6 +12,7 @@ type Config struct {
 type ServerSetting struct {
 	Port int    `mapstruct:"port"`
 	Mode string `mapstruct:"mode"`
+	Domain string `mapstruct:domain`
 }
 
 type RedisSetting struct {

@@ -1,4 +1,9 @@
-log/*
+
 configs/product.yaml
-./storage/logs
-./bin/*
+./storage/logs/*
+
+# Air live reload
+tmp/
+build-errors.log
+.air.toml.tmp
+bin/
