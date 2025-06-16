@@ -1,6 +1,6 @@
 
 configs/product.yaml
-./storage/logs/*
+storage/logs/*
 
 # Air live reload
 tmp/

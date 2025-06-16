@@ -76,10 +76,16 @@ help:
 	@echo "  goose-up      - Run migrations"
 	@echo "  goose-down    - Rollback last migration"
 	@echo "  goose-reset   - Reset all migrations"
-	@echo ""
-	@echo "DEVELOPMENT TOOLS:"
+	@echo ""	@echo "DEVELOPMENT TOOLS:"
 	@echo "  sqlgen        - Generate SQL code with sqlc"
 	@echo "  swag          - Generate Swagger documentation"
+	@echo ""
+	@echo "DEBEZIUM COMMANDS:"
+	@echo "  debezium-register     - Register MySQL connector with Debezium"
+	@echo "  debezium-status       - Check Debezium connector status"
+	@echo "  debezium-delete       - Delete Debezium connector"
+	@echo "  debezium-restart      - Restart Debezium connector"
+	@echo "  debezium-connectors   - List all Debezium connectors"
 	@echo ""
 	@echo "EXAMPLES:"
 	@echo "  make start                    # Start production services"
@@ -109,7 +115,11 @@ dev: dev-services swag
 
 dev-services:
 	@echo "[INFO] Stopping production services first..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "try { docker-compose --profile prod down } catch { }"
+else
 	@docker-compose --profile prod down 2>/dev/null || true
+endif
 	@echo "[INFO] Starting development services (MySQL, Redis, Kafka, Nginx-Dev)..."
 	docker-compose --profile dev up -d
 	@echo "[SUCCESS] Development services started."
@@ -120,7 +130,7 @@ dev-down:
 	@echo "[SUCCESS] Development services stopped."
 
 # Development with hot reload using Air
-watch: swag dev-services
+watch: swag dev-services 
 	@echo "[INFO] Starting development server with hot reload using Air..."
 	air
 
@@ -160,7 +170,11 @@ docker-build:
 # Production mode - with Go backend container
 prod-up:
 	@echo "[INFO] Stopping development services first..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "try { docker-compose --profile dev down } catch { }"
+else
 	@docker-compose --profile dev down 2>/dev/null || true
+endif
 	@echo "[INFO] Starting production environment..."
 	docker-compose --profile prod up -d
 	@echo "[SUCCESS] Production environment started."
@@ -172,21 +186,29 @@ prod-down:
 
 prod-build:
 	@echo "[INFO] Stopping development services first..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "try { docker-compose --profile dev down } catch { }"
+else
 	@docker-compose --profile dev down 2>/dev/null || true
+endif
 	@echo "[INFO] Building and starting production environment..."
 	docker-compose --profile prod up -d --build
 	@echo "[SUCCESS] Production environment built and started."
 
 # Start production services
 start: prod-up
-	@echo "[SUCCESS] Production services started successfully!"
-	@echo "[INFO] Application endpoints:"
-	@echo "  - API: http://crm.shopdev.test"
-	@echo "  - Admin: http://admin.shopdev.test"
-	@echo "  - Swagger: http://crm.shopdev.test/swagger/index.html"
+	@echo "[SUCCESS] Production services started successfully!"	@echo "[INFO] Application endpoints:"
+	@echo "  - API: http://crm.shopdev.com"
+	@echo "  - Admin: http://admin.shopdev.com"
+	@echo "  - Swagger: http://crm.shopdev.com/swagger/index.html"
 	@echo "[INFO] Checking service status in 5 seconds..."
+ifeq ($(OS),Windows_NT)
 	@powershell -Command "Start-Sleep 5"
+	@powershell -Command "docker ps --filter 'label=com.docker.compose.project=go-ecommerce-backend-api'"
+else
+	@sleep 5
 	@$(MAKE) status
+endif
 
 # Stop production services
 stop: prod-down
@@ -195,21 +217,34 @@ stop: prod-down
 # Stop all services (dev + prod)
 stop-all:
 	@echo "[INFO] Stopping all services (development and production)..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "try { docker-compose --profile dev down } catch { }"
+	@powershell -Command "try { docker-compose --profile prod down } catch { }"
+else
 	@docker-compose --profile dev down 2>/dev/null || true
 	@docker-compose --profile prod down 2>/dev/null || true
+endif
 	@echo "[SUCCESS] All services stopped!"
 
 # Switch to development mode
 switch-to-dev: 
 	@echo "[INFO] Switching to development mode..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "try { docker-compose --profile prod down } catch { }"
+else
 	@docker-compose --profile prod down 2>/dev/null || true
+endif
 	@$(MAKE) dev-services
 	@echo "[SUCCESS] Switched to development mode!"
 
 # Switch to production mode  
 switch-to-prod:
 	@echo "[INFO] Switching to production mode..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "try { docker-compose --profile dev down } catch { }"
+else
 	@docker-compose --profile dev down 2>/dev/null || true
+endif
 	@$(MAKE) prod-up
 	@echo "[SUCCESS] Switched to production mode!"
 
@@ -312,10 +347,91 @@ swag:
 
 
 # -------------------------
+# Debezium Management
+# -------------------------
+
+# Register MySQL connector with Debezium
+debezium-register:
+	@echo "[INFO] Registering MySQL connector with Debezium..."
+	@echo "[INFO] Waiting for Debezium to be ready..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "Start-Sleep 10"
+	@curl.exe -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql.json
+else
+	@sleep 10
+	@curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-mysql.json
+endif
+	@echo ""
+	@echo "[SUCCESS] MySQL connector registered successfully!"
+
+# Check Debezium connector status
+debezium-status:
+	@echo "[INFO] Checking Debezium connector status..."
+ifeq ($(OS),Windows_NT)
+	@curl.exe -s http://localhost:8083/connectors/mysql-connector/status
+else
+	@curl -s http://localhost:8083/connectors/mysql-connector/status | jq '.'
+endif
+
+# List all Debezium connectors
+debezium-connectors:
+	@echo "[INFO] Listing all Debezium connectors..."
+ifeq ($(OS),Windows_NT)
+	@curl.exe -s http://localhost:8083/connectors
+else
+	@curl -s http://localhost:8083/connectors | jq '.'
+endif
+
+# Delete Debezium connector
+debezium-delete:
+	@echo "[INFO] Deleting MySQL connector..."
+ifeq ($(OS),Windows_NT)
+	@curl.exe -i -X DELETE http://localhost:8083/connectors/mysql-connector
+else
+	@curl -i -X DELETE http://localhost:8083/connectors/mysql-connector
+endif
+	@echo ""
+	@echo "[SUCCESS] MySQL connector deleted!"
+
+# Restart Debezium connector
+debezium-restart:
+	@echo "[INFO] Restarting MySQL connector..."
+ifeq ($(OS),Windows_NT)
+	@curl.exe -i -X POST http://localhost:8083/connectors/mysql-connector/restart
+else
+	@curl -i -X POST http://localhost:8083/connectors/mysql-connector/restart
+endif
+	@echo ""
+	@echo "[SUCCESS] MySQL connector restarted!"
+
+# Check Debezium service health
+debezium-health:
+	@echo "[INFO] Checking Debezium service health..."
+ifeq ($(OS),Windows_NT)
+	@curl.exe -s http://localhost:8083/
+else
+	@curl -s http://localhost:8083/
+endif
+
+# Auto setup: Start services and register connector
+debezium-setup: dev-services
+	@echo "[INFO] Setting up Debezium with MySQL connector..."
+	@echo "[INFO] Waiting for services to be ready..."
+ifeq ($(OS),Windows_NT)
+	@powershell -Command "Start-Sleep 30"
+else
+	@sleep 30
+endif
+	@$(MAKE) debezium-register
+	@echo "[SUCCESS] Debezium setup completed!"
+
+# -------------------------
 # Phony Targets
 # -------------------------
 .PHONY: help init build dev watch run \
 	docker-up docker-down docker-build clean logs \
 	dump-schema dump-full \
 	goose-create goose-up goose-down goose-reset goose-up-by-one \
-	sqlgen swag start stop restart status stop-all switch-to-dev switch-to-prod
+	sqlgen swag start stop restart status stop-all switch-to-dev switch-to-prod \
+	debezium-register debezium-status debezium-delete debezium-restart debezium-connectors debezium-health debezium-setup\
+	debezium-register debezium-status debezium-delete debezium-restart debezium-connectors debezium-health debezium-setup

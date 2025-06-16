@@ -17,7 +17,7 @@ func SendMessageToKafka(key string, value string) error {
 		Time:  time.Now(),
 	}
 
-	err := global.KafkaProducer.WriteMessages(context.Background(), msg)
+	err := global.KafkaProducers["auth"].WriteMessages(context.Background(), msg)
 	if err != nil {
 		log.Printf("Failed to send message to Kafka: %v", err)
 		return err

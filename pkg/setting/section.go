@@ -10,8 +10,8 @@ type Config struct {
 }
 
 type ServerSetting struct {
-	Port int    `mapstruct:"port"`
-	Mode string `mapstruct:"mode"`
+	Port   int    `mapstruct:"port"`
+	Mode   string `mapstruct:"mode"`
 	Domain string `mapstruct:domain`
 }
 
@@ -46,13 +46,9 @@ type LoggerSetting struct {
 }
 
 type KafkaSetting struct {
-	Host  string `mapstruct:"host"`
-	Port  int    `mapstruct:"port"`
-	Topic struct {
-		Product string `mapstruct:"product"`
-		Order   string `mapstruct:"order"`
-		Auth    string `mapstruct:"auth"`
-	} `mapstruct:"topic"`
+	Host  string            `mapstructure:"host"`  // ✅
+	Port  int               `mapstructure:"port"`  // ✅
+	Topic map[string]string `mapstructure:"topic"` // ✅
 }
 
 // JWTSetting holds the configuration for JWT authentication.

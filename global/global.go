@@ -11,10 +11,10 @@ import (
 )
 
 var (
-	Config setting.Config
-	Logger *logger.LoggerZap
-	RDB    *redis.Client
-	MDB    *gorm.DB
-	MDBC   *sql.DB
-	KafkaProducer *kafka.Writer
+	Config         setting.Config
+	Logger         *logger.LoggerZap
+	RDB            *redis.Client
+	MDB            *gorm.DB
+	MDBC           *sql.DB
+	KafkaProducers map[string]*kafka.Writer
 )
