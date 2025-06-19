@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	docs "go-ecommerce-backend-api.com/cmd/swag/docs"
+	"go-ecommerce-backend-api.com/cmd/swag/docs"
 	"go-ecommerce-backend-api.com/global"
 )
 

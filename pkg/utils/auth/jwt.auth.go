@@ -68,3 +68,50 @@ func CreateToken(uuid string) (out *Token, err error) {
 	}
 	return out, nil
 }
+
+func ParseJwtTokenSubject(token string) (string, error) {
+	// Parse the token
+	parsedToken, err := jwt.ParseWithClaims(token, &PayloadClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(global.Config.JWT.ApiSecret), nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// Check if the token is valid
+	if claims, ok := parsedToken.Claims.(*PayloadClaims); ok && parsedToken.Valid {
+		return claims.Subject, nil
+	}
+	return "", jwt.ErrSignatureInvalid
+}
+
+// validateToken checks if the token is valid
+func ValidateToken(tokenString string) (*jwt.RegisteredClaims, error) {
+	// Parse the token
+	parsedToken, err := jwt.ParseWithClaims(tokenString, &PayloadClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(global.Config.JWT.ApiSecret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := parsedToken.Claims.(*PayloadClaims); ok && parsedToken.Valid {
+		return &claims.RegisteredClaims, nil
+	}
+	return nil, err
+}
+
+func VerifyTokenSubject(token string) (*jwt.RegisteredClaims, error) {
+	// Parse the token
+	parsedToken, err := jwt.ParseWithClaims(token, &PayloadClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(global.Config.JWT.ApiSecret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the token is valid
+	if claims, ok := parsedToken.Claims.(*PayloadClaims); ok && parsedToken.Valid {
+		return &claims.RegisteredClaims, nil
+	}
+	return nil, jwt.ErrSignatureInvalid
+}

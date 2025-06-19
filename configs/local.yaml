@@ -2,6 +2,7 @@ server:
   domain: "crm.shopdev.test"
   port: 8002
   mode: dev # Chế độ chạy: dev, prod
+  version: "1.0.0"
 mysql:
   host: 127.0.0.1
   port: 3306 #3306

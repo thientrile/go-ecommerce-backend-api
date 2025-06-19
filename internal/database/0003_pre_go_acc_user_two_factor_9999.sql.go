@@ -49,7 +49,7 @@ func (q *Queries) AddOrUpdateTwoFactor(ctx context.Context, arg AddOrUpdateTwoFa
 const countActiveTwoFactorMethods = `-- name: CountActiveTwoFactorMethods :one
 SELECT COUNT(*)
 FROM pre_go_acc_user_two_factor_9999
-WHERE user_id = ? AND two_factor_is_active = TRUE
+WHERE user_id = ? AND two_factor_is_active = 1
 `
 
 func (q *Queries) CountActiveTwoFactorMethods(ctx context.Context, userID int32) (int64, error) {
@@ -61,7 +61,7 @@ func (q *Queries) CountActiveTwoFactorMethods(ctx context.Context, userID int32)
 
 const disableTwoFactor = `-- name: DisableTwoFactor :exec
 UPDATE pre_go_acc_user_two_factor_9999
-SET two_factor_is_active = FALSE,
+SET two_factor_is_active = 0,
     two_factor_updated_at = NOW()
 WHERE user_id = ? AND two_factor_auth_type = ?
 `
@@ -90,6 +90,23 @@ type EnableTwoFactorTypeEmailParams struct {
 
 func (q *Queries) EnableTwoFactorTypeEmail(ctx context.Context, arg EnableTwoFactorTypeEmailParams) error {
 	_, err := q.db.ExecContext(ctx, enableTwoFactorTypeEmail, arg.UserID, arg.TwoFactorAuthType, arg.TwoFactorEmail)
+	return err
+}
+
+const enableTwoFactorTypeSMS = `-- name: EnableTwoFactorTypeSMS :exec
+INSERT INTO pre_go_acc_user_two_factor_9999 
+  (user_id, two_factor_auth_type, two_factor_phone, two_factor_auth_secret, two_factor_is_active, two_factor_created_at, two_factor_updated_at)
+VALUES (?, ?, ?, "OTP", FALSE, NOW(), NOW())
+`
+
+type EnableTwoFactorTypeSMSParams struct {
+	UserID            int32
+	TwoFactorAuthType PreGoAccUserTwoFactor9999TwoFactorAuthType
+	TwoFactorPhone    sql.NullString
+}
+
+func (q *Queries) EnableTwoFactorTypeSMS(ctx context.Context, arg EnableTwoFactorTypeSMSParams) error {
+	_, err := q.db.ExecContext(ctx, enableTwoFactorTypeSMS, arg.UserID, arg.TwoFactorAuthType, arg.TwoFactorPhone)
 	return err
 }
 
@@ -213,7 +230,7 @@ func (q *Queries) GetUserFactorMethods(ctx context.Context, userID int32) ([]Pre
 const isTwoFactorEnabled = `-- name: IsTwoFactorEnabled :one
 SELECT COUNT(*)
 FROM pre_go_acc_user_two_factor_9999
-WHERE user_id = ? AND two_factor_is_active = TRUE
+WHERE user_id = ? AND two_factor_is_active = 1
 `
 
 func (q *Queries) IsTwoFactorEnabled(ctx context.Context, userID int32) (int64, error) {
@@ -225,7 +242,7 @@ func (q *Queries) IsTwoFactorEnabled(ctx context.Context, userID int32) (int64, 
 
 const reactivateTwoFactor = `-- name: ReactivateTwoFactor :exec
 UPDATE pre_go_acc_user_two_factor_9999
-SET two_factor_is_active = TRUE, 
+SET two_factor_is_active = 1, 
     two_factor_updated_at = NOW()
 WHERE user_id = ? AND two_factor_auth_type = ?
 `
@@ -257,9 +274,9 @@ func (q *Queries) RemoveTwoFactor(ctx context.Context, arg RemoveTwoFactorParams
 
 const updateTwoFactorStatusVerification = `-- name: UpdateTwoFactorStatusVerification :exec
 UPDATE pre_go_acc_user_two_factor_9999
-SET two_factor_is_active = TRUE, 
+SET two_factor_is_active = 1, 
     two_factor_updated_at = NOW()
-WHERE user_id = ? AND two_factor_auth_type = ? AND two_factor_is_active = FALSE
+WHERE user_id = ? AND two_factor_auth_type = ? AND two_factor_is_active = 0
 `
 
 type UpdateTwoFactorStatusVerificationParams struct {
@@ -275,7 +292,7 @@ func (q *Queries) UpdateTwoFactorStatusVerification(ctx context.Context, arg Upd
 const verifyTwoFactor = `-- name: VerifyTwoFactor :one
 SELECT COUNT(*)
 FROM pre_go_acc_user_two_factor_9999
-WHERE user_id = ? AND two_factor_auth_type = ? AND two_factor_is_active = TRUE
+WHERE user_id = ? AND two_factor_auth_type = ? AND two_factor_is_active = 1
 LIMIT 1
 `
 

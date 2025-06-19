@@ -109,7 +109,7 @@ build:
 	@echo "[INFO] Building application..."
 	go build -o ./bin/$(APP_NAME) ./cmd/$(APP_NAME)/
 
-dev: dev-services swag
+dev: swag 
 	@echo "[INFO] Starting development server with ENV=local..."
 	go run ./cmd/$(APP_NAME)/
 
@@ -130,7 +130,7 @@ dev-down:
 	@echo "[SUCCESS] Development services stopped."
 
 # Development with hot reload using Air
-watch: swag dev-services 
+watch: dev-services 
 	@echo "[INFO] Starting development server with hot reload using Air..."
 	air
 

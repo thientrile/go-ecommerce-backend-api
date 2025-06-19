@@ -15,6 +15,8 @@ const (
 	//authentication
 	ErrCodeAuthenticationFailed = 60010 // Authentication failed
 	ErrCodeAuthenticationSuccess = 60011 // Authentication success
+	// two factor authentication
+	ErrCodeTwoFactorAuthFailed = 80001 // Two factor authentication failed
 )
 
 var msg = map[int]string{
@@ -31,4 +33,6 @@ var msg = map[int]string{
 	// authentication
 	ErrCodeAuthenticationFailed:   "Authentication failed",
 	ErrCodeAuthenticationSuccess: "Authentication success",
+	// two factor authentication
+	ErrCodeTwoFactorAuthFailed: "Two factor authentication failed",
 }

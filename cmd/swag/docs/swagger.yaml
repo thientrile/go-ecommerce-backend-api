@@ -22,6 +22,20 @@ definitions:
     - verify_purpose
     - verify_type
     type: object
+  model.SetupTwoFactorAuthInput:
+    properties:
+      two_factor_auth_type:
+        description: 1:"email" and 2:"sms"
+        type: integer
+      two_factor_email:
+        description: required if TwoFactorAuthType is "email"
+        type: string
+      user_id:
+        type: integer
+    required:
+    - two_factor_auth_type
+    - user_id
+    type: object
   model.UpdatePasswordRegisterInput:
     properties:
       password:
@@ -116,6 +130,41 @@ paths:
       summary: Register user with OTP
       tags:
       - accounts user
+  /user/setup-2fa:
+    post:
+      consumes:
+      - application/json
+      description: Enables two-factor authentication for the user account
+      parameters:
+      - description: Bearer{token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.SetupTwoFactorAuthInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Setup two-factor authentication for user
+      tags:
+      - accounts 2fa
   /user/update-password-register:
     post:
       consumes:

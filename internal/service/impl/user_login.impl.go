@@ -34,21 +34,93 @@ func NewUserLoginImpl(r *database.Queries) *sUserLogin {
 		r: r,
 	}
 }
+
 // ---- Two-Factor Authentication ----
 func (s *sUserLogin) IsTwoFactorEnabled(ctx context.Context, userId int64) (codeStatus int, rs bool, err error) {
 	// Check if two-factor authentication is enabled for the user
-	
-	return response.ErrCodeSuccess,true, nil
-}
 
+	return response.ErrCodeSuccess, true, nil
+}
 
 func (s *sUserLogin) SetupTwoFactorAuth(ctx context.Context, in *model.SetupTwoFactorAuthInput) (codeStatus int, err error) {
-	// Implement logic to set up two-factor authentication for the user
-	// This could involve generating a secret key and saving it in the database
-	// For example, you might use a library like "github.com/pquerna/otp" to generate a TOTP secret
+	// logic
+	// 1 check is two-factor authentication already enabled for the user
+	isTwoFacorAuth, err := s.r.IsTwoFactorEnabled(ctx, int32(in.UserId))
+	if err != nil {
+		return response.ErrCodeTwoFactorAuthFailed, err
+	}
+	if isTwoFacorAuth > 0 {
+		return response.ErrCodeTwoFactorAuthFailed, fmt.Errorf("two-factor authentication is already enabled for this user")
+	}
+	// 2 new type authe
+	var twoFactorAuthType database.PreGoAccUserTwoFactor9999TwoFactorAuthType
+	switch in.TwoFactorAuthType {
+	case consts.EMAIL:
+		twoFactorAuthType = database.PreGoAccUserTwoFactor9999TwoFactorAuthTypeEMAIL
+		err = s.r.EnableTwoFactorTypeEmail(ctx, database.EnableTwoFactorTypeEmailParams{
+			UserID:            int32(in.UserId),
+			TwoFactorAuthType: twoFactorAuthType,
+			TwoFactorEmail:    sql.NullString{String: in.TwoFactorEmail, Valid: true},
+		})
+	case consts.MOBILE:
+		twoFactorAuthType = database.PreGoAccUserTwoFactor9999TwoFactorAuthTypeSMS
+		err = s.r.EnableTwoFactorTypeSMS(ctx, database.EnableTwoFactorTypeSMSParams{
+			UserID:            int32(in.UserId),
+			TwoFactorAuthType: twoFactorAuthType,
+			TwoFactorPhone:    sql.NullString{String: in.TwoFactorEmail, Valid: true},
+		})
+	default:
+		twoFactorAuthType = database.PreGoAccUserTwoFactor9999TwoFactorAuthTypeAPP
+		err = s.r.EnableTwoFactorTypeEmail(ctx, database.EnableTwoFactorTypeEmailParams{
+			UserID:            int32(in.UserId),
+			TwoFactorAuthType: twoFactorAuthType,
+			TwoFactorEmail:    sql.NullString{String: in.TwoFactorEmail, Valid: true},
+		})
+	}
+
+	if err != nil {
+		global.Logger.Error("Error enabling two-factor authentication: ", zap.Error(err))
+		return response.ErrCodeTwoFactorAuthFailed, err
+	}
+	// 3 send otp to in.TwoFactorEmail
+	KeyUserTwoFator := crypto.GetHash("2fa:" + strconv.Itoa(int(in.UserId)))
+	otpNew := random.GenerateSixDigitOTP()
+	fmt.Printf("Generated OTP for user %d: %d\n", in.UserId, otpNew)
+	go global.RDB.Set(ctx, KeyUserTwoFator, otpNew, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+	switch in.TwoFactorAuthType {
+	case consts.EMAIL:
+		{
+
+			err = sendto.SendTemplateEmailOtp([]string{in.TwoFactorEmail}, "thientrile2003@gmail.com", "otp-auth.html", map[string]interface{}{
+				"otp":                strconv.Itoa(otpNew),
+				"expiration_minutes": consts.TIME_OTP_REGISTER,
+			})
+			if err != nil {
+				return response.ErrCodeSendEmailOtp, err
+			}
+
+		}
+	case consts.MOBILE:
+		{
+			return response.ErrCodeSuccess, nil
+		}
+
+	default:
+		{
+			body := make(map[string]interface{})
+			body["type"] = in.TwoFactorAuthType
+			body["otp"] = strconv.Itoa(otpNew)
+			body["email"] = in.TwoFactorEmail
+			bodyRequest, _ := json.Marshal(body)
+			err = sendto.SendMessageToKafka("Enable-auth-fator", string(bodyRequest))
+			if err != nil {
+				fmt.Printf("Error sending message to Kafka: %v\n", err)
+				return response.ErrCodeSendEmailOtp, err
+			}
+		}
+	}
 	return response.ErrCodeSuccess, nil
 }
-
 
 func (s *sUserLogin) VerifyTwoFactorAuth(ctx context.Context, in *model.TwoFactorVerifycationInput) (codeStatus int, err error) {
 	// Implement logic to verify the two-factor authentication code provided by the user
@@ -56,8 +128,6 @@ func (s *sUserLogin) VerifyTwoFactorAuth(ctx context.Context, in *model.TwoFacto
 	// For example, you might use a library like "github.com/pquerna/otp" to verify a TOTP code
 	return response.ErrCodeSuccess, nil
 }
-
-
 
 // ---- End of Two-Factor Authentication ----
 // Implement the methods of IUserLogin interface here
@@ -96,7 +166,7 @@ func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatu
 		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to marshal user info: %v", err)
 	}
 	// 8. give infoUser to redis with key =subToken
-	err = global.RDB.Set(ctx, subToken, infoUserJson, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+	err = global.RDB.Set(ctx, subToken, infoUserJson, time.Duration(consts.TIME_LOGIN_LIFE)*time.Minute).Err()
 	if err != nil {
 		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to set user info in Redis: %v", err)
 	}

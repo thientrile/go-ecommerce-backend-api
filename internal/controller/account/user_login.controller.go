@@ -16,6 +16,9 @@ var Login = new(cUserLogin)
 // cUserLogin is the controller for user login related actions.
 type cUserLogin struct{}
 
+
+
+
 // UpdatePasswordRegister documentation
 //
 // @Summary      Update password after registration
@@ -123,3 +126,5 @@ func (c *cUserLogin) Register(ctx *gin.Context) {
 	}
 	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)
 }
+
+

@@ -16,7 +16,10 @@ func InitMysqlC() {
 	)
 
 	db, err := sql.Open("mysql", dsn)
-	checkErrorPanic(err, "InitMysql initialization error")
+	if err != nil {
+		global.Logger.LogDBConnection("MySQL", fmt.Sprintf("%s:%v", m.Host, m.Port), false, err)
+		panic(fmt.Sprintf("Failed to initialize MySQL: %v", err))
+	}
 
 	// Set pool cấu hình
 	db.SetMaxIdleConns(m.MaxIdleConns)
@@ -26,8 +29,11 @@ func InitMysqlC() {
 
 	// Test kết nối
 	err = db.Ping()
-	checkErrorPanic(err, "Failed to ping DB")
+	if err != nil {
+		global.Logger.LogDBConnection("MySQL", fmt.Sprintf("%s:%v", m.Host, m.Port), false, err)
+		panic(fmt.Sprintf("Failed to ping MySQL database: %v", err))
+	}
 
-	global.Logger.Info("✅ MySQL connection pool initialized successfully")
+	global.Logger.LogDBConnection("MySQL", fmt.Sprintf("%s:%v", m.Host, m.Port), true, nil)
 	global.MDBC = db
 }

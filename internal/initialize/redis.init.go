@@ -23,8 +23,9 @@ func InitRedis() {
 	})
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
-		global.Logger.Error("Redis Initialzation Error::", zap.Error(err))
+		global.Logger.Panic("Redis Initialzation Error::", zap.Error(err))
 	}
+	global.Logger.Info("✅ Redis connection pool initialized successfully")
 	fmt.Println("Initialized Redis successfully");
 	global.RDB = rdb
 

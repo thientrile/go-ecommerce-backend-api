@@ -5,7 +5,8 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/main.exe"
-  cmd = "go build -o ./tmp/main.exe ./cmd/server/"
+  pre_cmd = ""make swag"
+  cmd =  "go build -o ./tmp/main.exe ./cmd/server/"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "storage", "nginx", "monitoring", "docs", "bin"]
   exclude_file = []
@@ -24,6 +25,7 @@ tmp_dir = "tmp"
   rerun_delay = 500
   send_interrupt = false
   stop_on_root = false
+  kill_delay = 500
 
 [color]
   app = ""
@@ -35,6 +37,7 @@ tmp_dir = "tmp"
 [log]
   main_only = false
   time = false
+  clear_log = true
 
 [misc]
   clean_on_exit = false

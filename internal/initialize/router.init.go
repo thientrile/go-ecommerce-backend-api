@@ -15,16 +15,18 @@ func InitRouter() *gin.Engine {
 		gin.SetMode(gin.DebugMode)
 		gin.ForceConsoleColor()
 		r = gin.New()
-		// Use custom colored logger instead of default
-		r.Use(middlewares.ColorLogger())
+		// Use custom logger middleware instead of default gin logger
+		r.Use(middlewares.LoggerMiddleware())
 		r.Use(gin.Recovery())
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 		r = gin.New()
+		// Use custom logger middleware
+		r.Use(middlewares.LoggerMiddleware())
 		r.Use(gin.Recovery())
 	}
 	// middlewares
-	// r.Use()// logger
+	// r.Use()// logger - đã sử dụng custom logger middleware ở trên
 	// r.Use() //cross origin resource sharing
 	// r.Use() // limiter global.Config.Limiter
 	managerRouter := routers.RouterGroupApp.Manager

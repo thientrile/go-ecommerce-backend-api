@@ -17,7 +17,8 @@ import (
 
 func checkErrorPanic(err error, errString string) {
 	if err != nil {
-		global.Logger.Error(errString, zap.Error(err))
+
+		global.Logger.Fatal(errString, zap.Error(err))
 		panic(err)
 	}
 }

@@ -63,6 +63,8 @@ type PreGoAccUserBase9999 struct {
 	UserLoginIp    sql.NullString
 	UserCreatedAt  sql.NullTime
 	UserUpdatedAt  sql.NullTime
+	// authentication two factor enable for the user
+	IsTwoFactorEnable sql.NullInt32
 }
 
 type PreGoAccUserInfo9999 struct {
