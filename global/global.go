@@ -5,6 +5,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
+	"github.com/ulule/limiter/v3"
 	"go-ecommerce-backend-api.com/pkg/logger"
 	"go-ecommerce-backend-api.com/pkg/setting"
 	"gorm.io/gorm"
@@ -17,4 +18,5 @@ var (
 	MDB            *gorm.DB
 	MDBC           *sql.DB
 	KafkaProducers map[string]*kafka.Writer
+	Limiters       map[string]*limiter.Limiter
 )

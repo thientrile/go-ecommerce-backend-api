@@ -214,13 +214,12 @@ func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatu
 		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to set user info in Redis: %v", err)
 	}
 	// 9. create token
-	tokenObj, err := auth.CreateToken(subToken)
+	token, err := auth.CreateToken(subToken)
 	if err != nil {
 		return response.ErrCodeAuthenticationFailed, out, err
 	}
-	out.Token.AccessToken = tokenObj.AccessToken
-	out.Token.RefreshToken = tokenObj.RefreshToken
-	out.Message = "Login successful"
+	out.Token = token
+
 	return response.ErrCodeSuccess, out, nil
 }
 

@@ -24,10 +24,7 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 type LoginOutput struct {
-	Token struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-	}
+	Token string `json:"token"`
 	Message string `json:"message"`
 }
 

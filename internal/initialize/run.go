@@ -31,7 +31,6 @@ func Run() {
 	global.Logger.LogInitStart("Service Interface")
 	InitServiceInterface()
 	global.Logger.LogInitStep("Service Interface", true, nil)
-
 	// initialize redis
 	global.Logger.LogInitStart("Redis")
 	InitRedis()
@@ -41,7 +40,8 @@ func Run() {
 	global.Logger.LogInitStart("Kafka")
 	InitKafka()
 	global.Logger.LogInitStep("Kafka", true, nil)
-
+	// initialize rate limiter
+	InitLimiter()
 	// initialize router
 	global.Logger.LogInitStart("Router")
 	r := InitRouter()

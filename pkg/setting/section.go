@@ -1,49 +1,50 @@
 package setting
 
 type Config struct {
-	Server ServerSetting `mapstruct:"server"`
-	Mysql  MSQLSetting   `mapstruct:"mysql"`
-	Logger LoggerSetting `mapstruct:"logger"`
-	Redis  RedisSetting  `mapstruct:"redis"`
-	Kafka  KafkaSetting  `mapstruct:"kafka"`
-	JWT    JWTSetting    `mapstruct:"jwt"`
+	Server  ServerSetting  `mapstructure:"server"`
+	Mysql   MSQLSetting    `mapstructure:"mysql"`
+	Logger  LoggerSetting  `mapstructure:"logger"`
+	Redis   RedisSetting   `mapstructure:"redis"`
+	Kafka   KafkaSetting   `mapstructure:"kafka"`
+	JWT     JWTSetting     `mapstructure:"jwt"`
+	Limiter LimiterSetting `mapstructure:"limiter"`
 }
 
 type ServerSetting struct {
-	Port    int    `mapstruct:"port"`
-	Mode    string `mapstruct:"mode"`
-	Domain  string `mapstruct:"domain"`
-	Version string `mapstruct:"version"`
+	Port    int    `mapstructure:"port"`
+	Mode    string `mapstructure:"mode"`
+	Domain  string `mapstructure:"domain"`
+	Version string `mapstructure:"version"`
 }
 
 type RedisSetting struct {
-	Host      string `mapstruct:"host"`
-	Port      int    `mapstruct:"port"`
-	Password  string `mapstruct:"password"`
-	Database  int    `mapstruct:"database"`
-	Pool_size int    `mapstruct:"pool_size"`
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	Password  string `mapstructure:"password"`
+	Database  int    `mapstructure:"database"`
+	Pool_size int    `mapstructure:"pool_size"`
 }
 
 type MSQLSetting struct {
-	Host            string `mapstruct:"host"`
-	Port            int    `mapstruct:"port"`
-	Username        string `mapstruct:"username"`
-	Password        string `mapstruct:"password"`
-	Dbname          string `mapstruct:"dbname"`
-	MaxIdleConns    int    `mapstruct:"maxIdleConns"`
-	MaxOpenConns    int    `mapstruct:"maxOpenConns"`
-	ConnMaxLifetime int    `mapstruct:"connMaxLifetime"`
-	ConnMaxIdleTime int    `mapstruct:"connMaxIdleTime"`
+	Host            string `mapstructure:"host"`
+	Port            int    `mapstructure:"port"`
+	Username        string `mapstructure:"username"`
+	Password        string `mapstructure:"password"`
+	Dbname          string `mapstructure:"dbname"`
+	MaxIdleConns    int    `mapstructure:"maxIdleConns"`
+	MaxOpenConns    int    `mapstructure:"maxOpenConns"`
+	ConnMaxLifetime int    `mapstructure:"connMaxLifetime"`
+	ConnMaxIdleTime int    `mapstructure:"connMaxIdleTime"`
 }
 
 type LoggerSetting struct {
-	Log_Level     string `mapstruct:"log_level"`
-	File_log_name string `mapstruct:"file_log_name"`
-	File_log_path string `mapstruct:"file_log_path"`
-	Max_size      int    `mapstruct:"max_size"`
-	Max_backups   int    `mapstruct:"max_backups"`
-	Max_age       int    `mapstruct:"max_age"`
-	Compress      bool   `mapstruct:"compress"`
+	Log_Level     string `mapstructure:"log_level"`
+	File_log_name string `mapstructure:"file_log_name"`
+	File_log_path string `mapstructure:"file_log_path"`
+	Max_size      int    `mapstructure:"max_size"`
+	Max_backups   int    `mapstructure:"max_backups"`
+	Max_age       int    `mapstructure:"max_age"`
+	Compress      bool   `mapstructure:"compress"`
 }
 
 type KafkaSetting struct {
@@ -54,8 +55,28 @@ type KafkaSetting struct {
 
 // JWTSetting holds the configuration for JWT authentication.
 type JWTSetting struct {
-	TokenHourLifespan int    `mapstruct:"TOKEN_HOUR_LIFETIME"`
-	JwtExpiration     string `mapstruct:"JWT_EXPIRATION"`
-	ApiSecret         string `mapstruct:"API_SECRET"`
-	Issuer            string `mapstruct:"ISSUER"`
+	TokenHourLifespan int    `mapstructure:"TOKEN_HOUR_LIFETIME"`
+	JwtExpiration     string `mapstructure:"JWT_EXPIRATION"`
+	ApiSecret         string `mapstructure:"API_SECRET"`
+	Issuer            string `mapstructure:"ISSUER"`
+}
+
+type LimiterSetting struct {
+	Store         int                    `mapstructure:"store" json:"store"`
+	DefaultConfig map[string]interface{} `mapstructure:"default_config" json:"default_config"`
+	Rules         map[string]RuleConfig  `mapstructure:"rules" json:"rules"`
+	URLPath       struct {
+		Public  []string `mapstructure:"public"`
+		Private []string `mapstructure:"private"`
+	} `mapstructure:"url_path"`
+}
+
+type RuleConfig struct {
+	Rate            string   `mapstructure:"rate" json:"rate"`
+	Description     string   `mapstructure:"description" json:"description"`
+	Enabled         bool     `mapstructure:"enabled" json:"enabled"`
+	BurstMultiplier int      `mapstructure:"burst_multiplier" json:"burst_multiplier"`
+	StrictMode      bool     `mapstructure:"strict_mode" json:"strict_mode"`
+	IPWhitelist     []string `mapstructure:"ip_whitelist" json:"ip_whitelist"`
+	MaxFileSize     string   `mapstructure:"max_file_size" json:"max_file_size"`
 }

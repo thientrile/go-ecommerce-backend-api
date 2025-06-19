@@ -42,5 +42,55 @@ SMTP:
 jwt:
   TOKEN_HOUR_LIFETIME: 1 # Thời gian sống của token (giờ)
   JWT_EXPIRATION: 1h
-  API_SECRET: "b7f8e2c9d4a1f6e3b5c7a9d2e4f6b8c1a3e5d7c9b1f3a5e7c2d4b6a8f0e2c4d6"
-  JWT_ISSUER: "go-ecommerce"
+  API_SECRET: "b7f8e2c9d4a1f6e3b5c7a9d2e4f6b8c1a3e5d7c9b1f3a5e7c2d4b6a8f0e2c4d6"  
+  ISSUER: "go-ecommerce"
+limiter:
+  store: 1  # 1=Redis, 0=Memory
+  default_config:
+    prefix: "rate_limit"
+    max_retry: 3
+    clean_up_interval: 300
+  
+  rules:
+    global:
+      rate: "100-S"
+      description: "Global rate limit per IP"
+      enabled: true
+      
+    public:
+      rate: "80-S" 
+      description: "Public API endpoints"
+      enabled: true
+      
+    private:
+      rate: "50-S"
+      description: "Private authenticated endpoints"
+      enabled: true
+      
+    auth:
+      rate: "10-M"
+      description: "Authentication endpoints (login/register)"
+      enabled: true
+      burst_multiplier: 2
+      
+    upload:
+      rate: "5-M"
+      description: "File upload endpoints"
+      enabled: true
+      max_file_size: "10MB"
+      
+    payment:
+      rate: "3-M"
+      description: "Payment processing endpoints"
+      enabled: true
+      strict_mode: true
+      
+    admin:
+      rate: "1000-S"
+      description: "Admin panel access"
+      enabled: true
+      ip_whitelist: ["192.168.1.0/24"]
+      
+url_path:
+    public: ["/v1/2025/user/login", "/v1/2025/user/register", "/v1/2025/user/update-password-register", "/v1/2025/user/verify-otp"]
+    private: ["/v1/2025/user/setup-2fa", "/v1/2025/user/profile", "/v1/2025/user/verify-2fa"]

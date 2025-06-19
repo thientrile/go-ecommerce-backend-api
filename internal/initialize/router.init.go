@@ -14,27 +14,32 @@ func InitRouter() *gin.Engine {
 	if s.Mode == "dev" {
 		gin.SetMode(gin.DebugMode)
 		gin.ForceConsoleColor()
-		r = gin.New()
+		r = gin.Default()
 		// Use custom logger middleware instead of default gin logger
-		r.Use(middlewares.LoggerMiddleware())
-		r.Use(gin.Recovery())
+		// r.Use(gin.Recovery())
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 		r = gin.New()
 		// Use custom logger middleware
-		r.Use(middlewares.LoggerMiddleware())
-		r.Use(gin.Recovery())
+		// r.Use(gin.Recovery())
 	}
 	// middlewares
-	// r.Use()// logger - đã sử dụng custom logger middleware ở trên
 	// r.Use() //cross origin resource sharing
-	// r.Use() // limiter global.Config.Limiter
+
+	// Initialize rate limiter once
+
+	r.Use(middlewares.NewRateLimiter().GlobalRateLimiter()) // limiter global.Config.Limiter
+	r.Use(middlewares.LoggerMiddleware())                   // logger - đã sử dụng custom logger middleware ở trên
 	managerRouter := routers.RouterGroupApp.Manager
 	userRouter := routers.RouterGroupApp.User
 
 	MainGroup := r.Group("/v1/2025")
 	{
-		MainGroup.GET("/checkStatus") // tracking monitoring
+		MainGroup.GET("/ping", func(ctx *gin.Context) {
+			ctx.JSON(200, gin.H{
+				"message": "pong",
+			})
+		}) // tracking monitoring
 	}
 	{
 		// user router

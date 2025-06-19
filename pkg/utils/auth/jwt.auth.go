@@ -10,10 +10,6 @@ import (
 type PayloadClaims struct {
 	jwt.RegisteredClaims
 }
-type Token struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-}
 
 func GenerateJWT(payload jwt.Claims) (string, error) {
 	// Create a new token object, specifying signing method and claims
@@ -28,7 +24,7 @@ func GenerateJWT(payload jwt.Claims) (string, error) {
 	return tokenString, nil
 }
 
-func CreateToken(uuid string) (out *Token, err error) {
+func CreateToken(uuid string) (out string, err error) {
 	timeEx := global.Config.JWT.JwtExpiration
 	if timeEx == "" {
 		timeEx = "1h"
@@ -39,7 +35,7 @@ func CreateToken(uuid string) (out *Token, err error) {
 	}
 	now := time.Now()
 	expiresAt := now.Add(expiration)
-	accessToken, err := GenerateJWT(PayloadClaims{RegisteredClaims: jwt.RegisteredClaims{
+	token, err := GenerateJWT(PayloadClaims{RegisteredClaims: jwt.RegisteredClaims{
 		Subject:   uuid,
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
 		IssuedAt:  jwt.NewNumericDate(now),
@@ -47,25 +43,9 @@ func CreateToken(uuid string) (out *Token, err error) {
 		ID:        uuid,
 	}})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	// Set refresh token expiration to 7 days
-	refreshExpiration := 7 * 24 * time.Hour
-	refreshExpiresAt := now.Add(refreshExpiration)
-	refreshToken, err := GenerateJWT(PayloadClaims{RegisteredClaims: jwt.RegisteredClaims{
-		Subject:   uuid,
-		ExpiresAt: jwt.NewNumericDate(refreshExpiresAt),
-		IssuedAt:  jwt.NewNumericDate(now),
-		Issuer:    global.Config.JWT.Issuer,
-		ID:        uuid,
-	}})
-	if err != nil {
-		return nil, err
-	}
-	out = &Token{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}
+	out = token
 	return out, nil
 }
 
