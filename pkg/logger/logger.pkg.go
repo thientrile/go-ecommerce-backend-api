@@ -3,8 +3,12 @@ package logger
 import (
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/fatih/color"
 	"github.com/natefinch/lumberjack"
+	"github.com/olekukonko/tablewriter"
 	"go-ecommerce-backend-api.com/pkg/setting"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -139,44 +143,79 @@ func getConsoleEncoderLog() zapcore.Encoder {
 
 // Helper methods cho việc logging dễ dàng hơn
 
-// PrintStartupBanner in ra banner khi khởi động server
+// PrintStartupBanner displays a professional startup banner using tablewriter
 func (l *LoggerZap) PrintStartupBanner(serviceName, version, port, env string) {
-	banner := fmt.Sprintf(`
-╔══════════════════════════════════════════════════════════════╗
-║                🛒 E-COMMERCE BACKEND API                     ║
-║══════════════════════════════════════════════════════════════║
-║  Service: %-20s                               ║
-║  Version: %-20s                               ║
-║  Environment: %-15s                               ║
-║  Port: %-23s                               ║
-╚══════════════════════════════════════════════════════════════╝`,
-		serviceName, version, env, port)
+	// Print header with colors
+	headerColor := color.New(color.FgCyan, color.Bold)
+	headerColor.Println("\n🛒 E-COMMERCE BACKEND API")
+	headerColor.Println(strings.Repeat("═", 50))
 
-	fmt.Println("\033[32m" + banner + "\033[0m") // Green color
-	l.Info("🚀 Starting E-Commerce Backend API server...")
+	// Create table for server information
+	table := tablewriter.NewWriter(os.Stdout)
+
+	// Set headers and data
+	table.Header("PROPERTY", "VALUE")
+	table.Append("🏷️ Service Name", serviceName)
+	table.Append("📦 Version", version)
+	table.Append("🌍 Environment", strings.ToUpper(env))
+	table.Append("🚪 Port", port)
+	table.Append("⏰ Started At", time.Now().Format("2006-01-02 15:04:05"))
+
+	// Render the table
+	table.Render()
+
+	// Print startup message
+	startupColor := color.New(color.FgGreen, color.Bold)
+	startupColor.Println("\n🚀 Starting E-Commerce Backend API server...")
+	fmt.Println(strings.Repeat("─", 50))
 }
 
-// LogInitStep logs từng bước khởi tạo
+// LogInitStep logs từng bước khởi tạo với format đẹp
 func (l *LoggerZap) LogInitStep(component string, success bool, err error) {
 	if success {
-		l.Info(fmt.Sprintf("✅ %s initialized successfully", component))
+		successColor := color.New(color.FgGreen, color.Bold)
+		successColor.Printf("✅ %-30s ", component)
+		color.New(color.FgGreen).Println("initialized successfully")
+		l.Info(fmt.Sprintf("%s initialized successfully", component))
 	} else {
-		l.Error(fmt.Sprintf("❌ Failed to initialize %s", component), zap.Error(err))
+		errorColor := color.New(color.FgRed, color.Bold)
+		errorColor.Printf("❌ %-30s ", component)
+		color.New(color.FgRed).Println("initialization failed")
+		l.Error(fmt.Sprintf("Failed to initialize %s", component), zap.Error(err))
 	}
 }
 
-// LogInitStart logs bắt đầu khởi tạo một component
+// LogInitStart logs bắt đầu khởi tạo một component với format đẹp
 func (l *LoggerZap) LogInitStart(component string) {
-	l.Info(fmt.Sprintf("🔧 Initializing %s...", component))
+	initColor := color.New(color.FgYellow, color.Bold)
+	initColor.Printf("🔧 Initializing %-25s", component)
+	color.New(color.FgYellow).Println("...")
+	l.Info(fmt.Sprintf("Initializing %s...", component))
 }
 
-// LogDBConnection logs kết nối database
+// LogDBConnection logs kết nối database với table format
 func (l *LoggerZap) LogDBConnection(dbType string, host string, success bool, err error) {
 	if success {
-		l.Info(fmt.Sprintf("💾 Connected to %s database", dbType),
+		// Create a small table for successful DB connection
+		table := tablewriter.NewWriter(os.Stdout)
+		table.Header("DATABASE CONNECTION", "STATUS")
+		table.Append(fmt.Sprintf("💾 %s", dbType), "✅ CONNECTED")
+		table.Append("Host", host)
+		table.Append("Time", time.Now().Format("15:04:05"))
+		table.Render()
+
+		l.Info(fmt.Sprintf("Connected to %s database", dbType),
 			zap.String("host", host))
 	} else {
-		l.Error(fmt.Sprintf("💾 Failed to connect to %s database", dbType),
+		errorColor := color.New(color.FgRed, color.Bold)
+		errorColor.Printf("💾 %-20s ", fmt.Sprintf("%s Database", strings.ToUpper(dbType)))
+		color.New(color.FgRed).Println("❌ CONNECTION FAILED")
+		color.New(color.FgRed).Printf("   Host: %s\n", host)
+		if err != nil {
+			color.New(color.FgRed).Printf("   Error: %s\n", err.Error())
+		}
+
+		l.Error(fmt.Sprintf("Failed to connect to %s database", dbType),
 			zap.String("host", host),
 			zap.Error(err))
 	}
@@ -202,9 +241,23 @@ func (l *LoggerZap) LogHTTPRequest(method, path, ip string, status int, duration
 		zap.String("duration", duration))
 }
 
-// LogShutdown logs khi server shutdown
+// LogShutdown logs khi server shutdown với format đẹp
 func (l *LoggerZap) LogShutdown(reason string) {
-	l.Info("🛑 Server shutting down gracefully...", zap.String("reason", reason))
-	fmt.Println("\033[33m══════════════════════════════════════════════════════════════\033[0m")
-	fmt.Println("\033[33m🛑 Server shutdown complete. Goodbye!\033[0m")
+	l.Info("Server shutting down gracefully...", zap.String("reason", reason))
+
+	// Create shutdown table
+	shutdownColor := color.New(color.FgYellow, color.Bold)
+	shutdownColor.Println("\n🛑 SERVER SHUTDOWN")
+	shutdownColor.Println(strings.Repeat("═", 40))
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header("SHUTDOWN INFO", "VALUE")
+	table.Append("🛑 Status", "SHUTTING DOWN")
+	table.Append("📝 Reason", reason)
+	table.Append("⏰ Time", time.Now().Format("2006-01-02 15:04:05"))
+	table.Render()
+
+	goodbyeColor := color.New(color.FgCyan, color.Bold)
+	goodbyeColor.Println("\n🛑 Server shutdown complete. Goodbye!")
+	fmt.Println(strings.Repeat("═", 40))
 }

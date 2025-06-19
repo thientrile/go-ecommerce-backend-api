@@ -130,7 +130,7 @@ dev-down:
 	@echo "[SUCCESS] Development services stopped."
 
 # Development with hot reload using Air
-watch: dev-services 
+watch: 
 	@echo "[INFO] Starting development server with hot reload using Air..."
 	air
 
