@@ -37,7 +37,8 @@ func (pr *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
 	// userRouterPrivate.Use(Authen()) // Add any necessary middleware here, e.g., authentication
 	// userRouterPrivate.Use(Permission()) // Add any necessary middleware here, e.g., authentication
 	{
-		userRouterPrivate.POST("/setup-2fa", account.TwoFA.SetupTwoFactorAuth) // Setup two-factor authentication -> Yes ->No
+		userRouterPrivate.POST("/setup-2fa", account.TwoFA.SetupTwoFactorAuth)   // Setup two-factor authentication -> Yes ->No
+		userRouterPrivate.POST("/verify-2fa", account.TwoFA.VerifyTwoFactorAuth) // Setup two-factor authentication -> Yes ->No
 	}
 
 }

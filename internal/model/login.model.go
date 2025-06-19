@@ -33,13 +33,11 @@ type LoginOutput struct {
 
 // two factor authentication
 type SetupTwoFactorAuthInput struct {
-	UserId            uint32 `json:"user_id" binding:"required"`
-	TwoFactorAuthType int    `json:"two_factor_auth_type" binding:"required"` // 1:"email" and 2:"sms"
+	TwoFactorAuthType int    `json:"two_factor_auth_type" binding:"required"` // 1:"email" and 2:"sms" or 3:"app"
 	TwoFactorEmail    string `json:"two_factor_email,omitempty"`              // required if TwoFactorAuthType is "email"
 }
 
 type TwoFactorVerifycationInput struct {
-	UserId            uint32 `json:"user_id" binding:"required"`
 	TwoFactorCode     string `json:"two_factor_code" binding:"required"`      // the code to verify
-	TwoFactorAuthType string `json:"two_factor_auth_type" binding:"required"` // "email" or "sms"
+	TwoFactorAuthType int    `json:"two_factor_auth_type" binding:"required"` // 1:"email" and 2:"sms" or 3:"app"
 }

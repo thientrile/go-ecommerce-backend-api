@@ -206,6 +206,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/verify-2fa": {
+            "post": {
+                "description": "Verifies the two-factor authentication code for the user account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts 2fa"
+                ],
+                "summary": "Verify two-factor authentication code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer{token}",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.TwoFactorVerifycationInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/user/verify-otp": {
             "post": {
                 "description": "Verify the OTP sent to the user",
@@ -291,20 +344,33 @@ const docTemplate = `{
         "model.SetupTwoFactorAuthInput": {
             "type": "object",
             "required": [
-                "two_factor_auth_type",
-                "user_id"
+                "two_factor_auth_type"
             ],
             "properties": {
                 "two_factor_auth_type": {
-                    "description": "1:\"email\" and 2:\"sms\"",
+                    "description": "1:\"email\" and 2:\"sms\" or 3:\"app\"",
                     "type": "integer"
                 },
                 "two_factor_email": {
                     "description": "required if TwoFactorAuthType is \"email\"",
                     "type": "string"
-                },
-                "user_id": {
+                }
+            }
+        },
+        "model.TwoFactorVerifycationInput": {
+            "type": "object",
+            "required": [
+                "two_factor_auth_type",
+                "two_factor_code"
+            ],
+            "properties": {
+                "two_factor_auth_type": {
+                    "description": "1:\"email\" and 2:\"sms\" or 3:\"app\"",
                     "type": "integer"
+                },
+                "two_factor_code": {
+                    "description": "the code to verify",
+                    "type": "string"
                 }
             }
         },

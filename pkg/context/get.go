@@ -3,7 +3,6 @@ package context
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"go-ecommerce-backend-api.com/pkg/cache"
 )
@@ -15,7 +14,6 @@ type InfoUserUUID struct {
 
 func GetSubjectUUID(ctx context.Context) (string, error) {
 	sUUID, ok := ctx.Value("subjectUUID").(string)
-	fmt.Print("GetSubjectUUID: ", sUUID, "\n")
 	if !ok || sUUID == "" {
 		return "", errors.New("failed to get subject UUID from context")
 	}

@@ -35,8 +35,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		// Optionally, set claims in context for downstream handlers
-		log.Println("Claims:", claims.Subject)
-		c.Set("subjectUUID", claims.Subject)
+		c.Set("subjectUUID", claims.Subject)		
 		c.Set("claims", claims)
 		c.Next()
 	}

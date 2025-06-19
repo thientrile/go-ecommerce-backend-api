@@ -57,3 +57,4 @@ func GenerateUUID(userId int) string {
 	uuidString := strings.ReplaceAll(newUUID.String(), "-", text)
 	return strconv.Itoa(userId) + "_" + uuidString
 }
+

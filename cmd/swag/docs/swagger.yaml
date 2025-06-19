@@ -25,16 +25,25 @@ definitions:
   model.SetupTwoFactorAuthInput:
     properties:
       two_factor_auth_type:
-        description: 1:"email" and 2:"sms"
+        description: 1:"email" and 2:"sms" or 3:"app"
         type: integer
       two_factor_email:
         description: required if TwoFactorAuthType is "email"
         type: string
-      user_id:
-        type: integer
     required:
     - two_factor_auth_type
-    - user_id
+    type: object
+  model.TwoFactorVerifycationInput:
+    properties:
+      two_factor_auth_type:
+        description: 1:"email" and 2:"sms" or 3:"app"
+        type: integer
+      two_factor_code:
+        description: the code to verify
+        type: string
+    required:
+    - two_factor_auth_type
+    - two_factor_code
     type: object
   model.UpdatePasswordRegisterInput:
     properties:
@@ -195,6 +204,41 @@ paths:
       summary: Update password after registration
       tags:
       - accounts user
+  /user/verify-2fa:
+    post:
+      consumes:
+      - application/json
+      description: Verifies the two-factor authentication code for the user account
+      parameters:
+      - description: Bearer{token}
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.TwoFactorVerifycationInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Verify two-factor authentication code
+      tags:
+      - accounts 2fa
   /user/verify-otp:
     post:
       consumes:

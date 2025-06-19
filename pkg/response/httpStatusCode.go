@@ -12,11 +12,13 @@ const (
 	ErrCodeOtpNotExist     = 60000 // OTP does not exist
 	ErrCodeUserOtpNotExist = 60008 // OTP exists but is not valid
 	ErrCodeUserNotExist    = 60009 // User does not exist
+	ErrCodeTwoFactorEnabled = 60012 // Two-factor authentication is enabled
 	//authentication
-	ErrCodeAuthenticationFailed = 60010 // Authentication failed
+	ErrCodeAuthenticationFailed  = 60010 // Authentication failed
 	ErrCodeAuthenticationSuccess = 60011 // Authentication success
 	// two factor authentication
-	ErrCodeTwoFactorAuthFailed = 80001 // Two factor authentication failed
+	ErrCodeTwoFactorAuthFailed        = 80001 // Two factor authentication failed
+	ErrCodeTwoFactorAuthVerifyFailded = 80002 // Two factor authentication success
 )
 
 var msg = map[int]string{
@@ -30,9 +32,11 @@ var msg = map[int]string{
 	ErrCodeOtpNotExist:     "OTP exists but is not valid",
 	ErrCodeUserOtpNotExist: "OTP does not exist",
 	ErrCodeUserNotExist:    "User does not exist",
+	ErrCodeTwoFactorEnabled: "Two-factor authentication is enabled",
 	// authentication
-	ErrCodeAuthenticationFailed:   "Authentication failed",
+	ErrCodeAuthenticationFailed:  "Authentication failed",
 	ErrCodeAuthenticationSuccess: "Authentication success",
 	// two factor authentication
-	ErrCodeTwoFactorAuthFailed: "Two factor authentication failed",
+	ErrCodeTwoFactorAuthFailed:        "Two factor authentication failed",
+	ErrCodeTwoFactorAuthVerifyFailded: "Two factor authentication verification failed",
 }

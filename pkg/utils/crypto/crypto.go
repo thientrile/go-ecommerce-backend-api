@@ -40,3 +40,11 @@ func MatchingPassword(storeHash string, password string, salt string) bool {
 	hashPassword := HashPassword(password, salt)
 	return storeHash == hashPassword
 }
+
+func GeneralSecretKey() (string, error) {
+	salt, err := GenerateSalt(32) // Generate a 32-byte salt
+	if err != nil {
+		return "", fmt.Errorf("failed to generate secret key: %w", err)
+	}			
+	return salt, nil
+}

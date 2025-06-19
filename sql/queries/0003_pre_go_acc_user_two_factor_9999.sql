@@ -8,6 +8,7 @@ INSERT INTO pre_go_acc_user_two_factor_9999
   (user_id, two_factor_auth_type, two_factor_phone, two_factor_auth_secret, two_factor_is_active, two_factor_created_at, two_factor_updated_at)
 VALUES (?, ?, ?, "OTP", FALSE, NOW(), NOW());
 
+
 -- name: DisableTwoFactor :exec
 UPDATE pre_go_acc_user_two_factor_9999
 SET two_factor_is_active = 0,

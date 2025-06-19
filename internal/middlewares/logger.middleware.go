@@ -14,7 +14,8 @@ func LoggerMiddleware() gin.HandlerFunc {
 		start := time.Now()
 		path := c.Request.URL.Path
 		raw := c.Request.URL.RawQuery
-
+		clientIP := c.ClientIP()
+		c.Set("IpAddress", clientIP)
 		// Process request
 		c.Next()
 
@@ -22,7 +23,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 		duration := time.Since(start)
 
 		// Get client IP
-		clientIP := c.ClientIP()
+
 		method := c.Request.Method
 		statusCode := c.Writer.Status()
 		bodySize := c.Writer.Size()
