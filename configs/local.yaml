@@ -89,8 +89,7 @@ limiter:
       rate: "1000-S"
       description: "Admin panel access"
       enabled: true
-      ip_whitelist: ["192.168.1.0/24"]
-      
-url_path:
+      ip_whitelist: ["192.168.1.0/24"]      
+  url_path:
     public: ["/v1/2025/user/login", "/v1/2025/user/register", "/v1/2025/user/update-password-register", "/v1/2025/user/verify-otp"]
     private: ["/v1/2025/user/setup-2fa", "/v1/2025/user/profile", "/v1/2025/user/verify-2fa"]

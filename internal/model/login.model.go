@@ -24,7 +24,7 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 type LoginOutput struct {
-	Token string `json:"token"`
+	Token   string `json:"token"`
 	Message string `json:"message"`
 }
 
@@ -37,4 +37,8 @@ type SetupTwoFactorAuthInput struct {
 type TwoFactorVerifycationInput struct {
 	TwoFactorCode     string `json:"two_factor_code" binding:"required"`      // the code to verify
 	TwoFactorAuthType int    `json:"two_factor_auth_type" binding:"required"` // 1:"email" and 2:"sms" or 3:"app"
+}
+type TwoFactorVerifyOtp struct {
+	TwoFactorCode      string `json:"two_factor_code" binding:"required"` // the code to verify
+	TwoFactorAuthToken int    `json:"two_factor_auth_type" binding:"required"`
 }

@@ -31,12 +31,12 @@ func LoggerMiddleware() gin.HandlerFunc {
 		if raw != "" {
 			path = path + "?" + raw
 		}
-
 		// Log với format đẹp
 		global.Logger.LogHTTPRequest(
 			method,
 			path,
 			clientIP,
+			c.GetHeader("User-Agent"),
 			statusCode,
 			duration.String(),
 		)

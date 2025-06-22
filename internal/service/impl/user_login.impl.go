@@ -135,6 +135,9 @@ func (s *sUserLogin) VerifyTwoFactorAuth(ctx context.Context, in *model.TwoFacto
 	}
 	return response.ErrCodeSuccess, nil
 }
+func (s *sUserLogin) VerifyTwoFactorAuthOTP(ctx context.Context, in *model.TwoFactorVerifyOtp) (codeStatus int, out model.LoginOutput, err error) {
+	return response.ErrCodeTwoFactorAuthVerifyFailded, out, nil
+}
 
 // validateOTP handles OTP validation and attempt counting for two-factor authentication.
 
@@ -170,18 +173,22 @@ func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatu
 			return response.ErrCodeTwoFactorEnabled, out, fmt.Errorf("no two-factor methods found for user")
 		}
 		authType := convertAuthType(string(foundFactorMethods[0].TwoFactorAuthType))
-		// set OTP for two-factor authentication
-		hashKey := crypto.GetHash(strconv.FormatUint(uint64(userBaseFound.UserID), 10))
-		KeyUserTwoFator := utils.GetUserKey(hashKey)
-		otpNew := random.GenerateSixDigitOTP()
-		go global.RDB.SetEx(ctx, KeyUserTwoFator, otpNew, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
-		// send OTP to user
 		key := map[int]string{
 			consts.EMAIL: foundFactorMethods[0].TwoFactorEmail.String,
 			consts.SMS:   foundFactorMethods[0].TwoFactorPhone.String,
 		}
+		// set OTP for two-factor authentication
+		str := fmt.Sprintf("%s-%d", strings.ToLower(key[authType]), userBaseFound.UserID)
+		hashKey := crypto.GetHash(str)
+		// hashKey := crypto.GetHash(strconv.FormatUint(uint64(userBaseFound.UserID), 10))
+		KeyUserTwoFator := utils.GetUserKey(hashKey)
+		otpNew := random.GenerateSixDigitOTP()
+		go global.RDB.SetEx(ctx, KeyUserTwoFator, otpNew, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+		// send OTP to user
+
 		go sendOtp(key[authType], authType, strconv.Itoa(otpNew))
 		out.Message = fmt.Sprintf("Two-factor authentication is enabled. Please verify your OTP sent to %s", foundFactorMethods[0].TwoFactorAuthType)
+		out.Token = hashKey
 		return response.ErrCodeSuccess, out, nil
 	}
 	//get ip address from context
@@ -294,11 +301,13 @@ func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out 
 	hashKey := crypto.GetHash(strings.ToLower(in.VerifyKey))
 	userKey := utils.GetUserKey(hashKey)
 	if err := validateOTP(ctx, userKey, in.VerifyCode); err != nil {
+
 		return out, fmt.Errorf("OTP verification failed: %v", err)
 	}
 
 	infoOTP, err := s.r.GetValidOTP(ctx, hashKey)
 	if err != nil {
+		go s.r.DeleteVerifyByKeyHashHard(ctx, hashKey)
 		return out, fmt.Errorf("OTP invalid: %v", err)
 	}
 	// update status verify otp
@@ -310,7 +319,7 @@ func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out 
 	out.Token = infoOTP.VerifyKeyHash
 	out.Message = "OTP verified successfully"
 
-	return out, err
+	return out, nil
 }
 
 func (s *sUserLogin) UpdatePasswordRegister(ctx context.Context, in *model.UpdatePasswordRegisterInput) (codeStatus int, err error) {
@@ -369,6 +378,8 @@ func (s *sUserLogin) UpdatePasswordRegister(ctx context.Context, in *model.Updat
 
 		return response.ErrCodeUserHasExist, err
 	}
+	// delete otp in sql
+	go s.r.DeleteVerifyByIDHard(ctx, infoOTP.VerifyID)
 	return response.ErrCodeSuccess, nil
 }
 

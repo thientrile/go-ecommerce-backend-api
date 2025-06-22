@@ -10,6 +10,108 @@ import (
 	"database/sql"
 )
 
+const deleteExpiredByKeyHash = `-- name: DeleteExpiredByKeyHash :exec
+UPDATE ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+SET ` + "`" + `is_deleted` + "`" + ` = 1, ` + "`" + `verify_updated_at` + "`" + ` = NOW() 
+WHERE ` + "`" + `verify_key_hash` + "`" + ` = ? 
+AND ` + "`" + `verify_created_at` + "`" + ` < DATE_SUB(NOW(), INTERVAL ? MINUTE) 
+AND ` + "`" + `is_deleted` + "`" + ` = 0
+`
+
+type DeleteExpiredByKeyHashParams struct {
+	VerifyKeyHash string
+	DATESUB       interface{}
+}
+
+// Delete expired verification by verify_key_hash (older than specified minutes)
+func (q *Queries) DeleteExpiredByKeyHash(ctx context.Context, arg DeleteExpiredByKeyHashParams) error {
+	_, err := q.db.ExecContext(ctx, deleteExpiredByKeyHash, arg.VerifyKeyHash, arg.DATESUB)
+	return err
+}
+
+const deleteExpiredVerifications = `-- name: DeleteExpiredVerifications :exec
+UPDATE ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+SET ` + "`" + `is_deleted` + "`" + ` = 1, ` + "`" + `verify_updated_at` + "`" + ` = NOW() 
+WHERE ` + "`" + `verify_created_at` + "`" + ` < DATE_SUB(NOW(), INTERVAL 24 HOUR) 
+AND ` + "`" + `is_deleted` + "`" + ` = 0
+`
+
+// Delete all expired verification records (older than 24 hours)
+func (q *Queries) DeleteExpiredVerifications(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteExpiredVerifications)
+	return err
+}
+
+const deleteUnverifiedByKeyHash = `-- name: DeleteUnverifiedByKeyHash :exec
+UPDATE ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+SET ` + "`" + `is_deleted` + "`" + ` = 1, ` + "`" + `verify_updated_at` + "`" + ` = NOW() 
+WHERE ` + "`" + `verify_key_hash` + "`" + ` = ? AND ` + "`" + `is_verified` + "`" + ` = 0 AND ` + "`" + `is_deleted` + "`" + ` = 0
+`
+
+// Delete only unverified records by verify_key_hash (soft delete)
+func (q *Queries) DeleteUnverifiedByKeyHash(ctx context.Context, verifyKeyHash string) error {
+	_, err := q.db.ExecContext(ctx, deleteUnverifiedByKeyHash, verifyKeyHash)
+	return err
+}
+
+const deleteVerifiedRecords = `-- name: DeleteVerifiedRecords :exec
+DELETE FROM ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+WHERE ` + "`" + `is_verified` + "`" + ` = 1 
+AND ` + "`" + `verify_updated_at` + "`" + ` < DATE_SUB(NOW(), INTERVAL 7 DAY)
+`
+
+// Clean up verified records older than 7 days
+func (q *Queries) DeleteVerifiedRecords(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteVerifiedRecords)
+	return err
+}
+
+const deleteVerifyByID = `-- name: DeleteVerifyByID :exec
+UPDATE ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+SET ` + "`" + `is_deleted` + "`" + ` = 1, ` + "`" + `verify_updated_at` + "`" + ` = NOW() 
+WHERE ` + "`" + `verify_id` + "`" + ` = ?
+`
+
+// Delete OTP verification record by verify_id (soft delete)
+func (q *Queries) DeleteVerifyByID(ctx context.Context, verifyID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteVerifyByID, verifyID)
+	return err
+}
+
+const deleteVerifyByIDHard = `-- name: DeleteVerifyByIDHard :exec
+DELETE FROM ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+WHERE ` + "`" + `verify_id` + "`" + ` = ?
+`
+
+// Hard delete OTP verification record by verify_id
+func (q *Queries) DeleteVerifyByIDHard(ctx context.Context, verifyID int32) error {
+	_, err := q.db.ExecContext(ctx, deleteVerifyByIDHard, verifyID)
+	return err
+}
+
+const deleteVerifyByKeyHash = `-- name: DeleteVerifyByKeyHash :exec
+UPDATE ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+SET ` + "`" + `is_deleted` + "`" + ` = 1, ` + "`" + `verify_updated_at` + "`" + ` = NOW() 
+WHERE ` + "`" + `verify_key_hash` + "`" + ` = ? AND ` + "`" + `is_deleted` + "`" + ` = 0
+`
+
+// Delete OTP verification record by verify_key_hash (soft delete)
+func (q *Queries) DeleteVerifyByKeyHash(ctx context.Context, verifyKeyHash string) error {
+	_, err := q.db.ExecContext(ctx, deleteVerifyByKeyHash, verifyKeyHash)
+	return err
+}
+
+const deleteVerifyByKeyHashHard = `-- name: DeleteVerifyByKeyHashHard :exec
+DELETE FROM ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+WHERE ` + "`" + `verify_key_hash` + "`" + ` = ?
+`
+
+// Hard delete OTP verification record by verify_key_hash
+func (q *Queries) DeleteVerifyByKeyHashHard(ctx context.Context, verifyKeyHash string) error {
+	_, err := q.db.ExecContext(ctx, deleteVerifyByKeyHashHard, verifyKeyHash)
+	return err
+}
+
 const getInfoOTP = `-- name: GetInfoOTP :one
 SELECT verify_id, verify_otp,verify_key,verify_key_hash,verify_type,is_verified,is_deleted,verify_created_at 
 FROM ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
@@ -66,6 +168,31 @@ func (q *Queries) GetValidOTP(ctx context.Context, verifyKeyHash string) (GetVal
 		&i.VerifyKeyHash,
 		&i.VerifyKey,
 		&i.VerifyID,
+	)
+	return i, err
+}
+
+const getVerifyByID = `-- name: GetVerifyByID :one
+SELECT verify_id, verify_otp, verify_key, verify_key_hash, verify_type, is_verified, is_deleted, verify_created_at, verify_updated_at
+FROM ` + "`" + `pre_go_acc_user_verify_9999` + "`" + ` 
+WHERE ` + "`" + `verify_id` + "`" + ` = ? AND ` + "`" + `is_deleted` + "`" + ` = 0
+LIMIT 1
+`
+
+// Get verification record by verify_id
+func (q *Queries) GetVerifyByID(ctx context.Context, verifyID int32) (PreGoAccUserVerify9999, error) {
+	row := q.db.QueryRowContext(ctx, getVerifyByID, verifyID)
+	var i PreGoAccUserVerify9999
+	err := row.Scan(
+		&i.VerifyID,
+		&i.VerifyOtp,
+		&i.VerifyKey,
+		&i.VerifyKeyHash,
+		&i.VerifyType,
+		&i.IsVerified,
+		&i.IsDeleted,
+		&i.VerifyCreatedAt,
+		&i.VerifyUpdatedAt,
 	)
 	return i, err
 }

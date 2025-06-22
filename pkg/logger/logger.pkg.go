@@ -222,7 +222,7 @@ func (l *LoggerZap) LogDBConnection(dbType string, host string, success bool, er
 }
 
 // LogHTTPRequest logs HTTP requests với format đẹp
-func (l *LoggerZap) LogHTTPRequest(method, path, ip string, status int, duration string) {
+func (l *LoggerZap) LogHTTPRequest(method, path, ip, userAgent string, status int, duration string) {
 	var statusIcon string
 	switch {
 	case status >= 200 && status < 300:
@@ -238,7 +238,8 @@ func (l *LoggerZap) LogHTTPRequest(method, path, ip string, status int, duration
 	l.Info(fmt.Sprintf("%s %s %s", statusIcon, method, path),
 		zap.String("ip", ip),
 		zap.Int("status", status),
-		zap.String("duration", duration))
+		zap.String("duration", duration),
+		zap.String("user_agent", userAgent))
 }
 
 // LogShutdown logs khi server shutdown với format đẹp

@@ -21,6 +21,8 @@ type (
 
 		// verify Two-Factor Authentication
 		VerifyTwoFactorAuth(ctx context.Context, in *model.TwoFactorVerifycationInput) (codeStatus int, err error)
+		// verify Two-Factor Authentication otp
+		VerifyTwoFactorAuthOTP(ctx context.Context, in *model.TwoFactorVerifyOtp) (codeStatus int, out model.LoginOutput, err error)
 	}
 	IUserInfo interface {
 		GetInfoByUserId(ctx context.Context) error
