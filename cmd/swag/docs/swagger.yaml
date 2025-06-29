@@ -33,6 +33,21 @@ definitions:
     required:
     - two_factor_auth_type
     type: object
+  model.TwoFactorVerifyOtp:
+    properties:
+      two_factor_auth_token:
+        type: string
+      two_factor_code:
+        description: the code to verify
+        type: string
+      verify_key:
+        description: the key to verify
+        type: string
+    required:
+    - two_factor_auth_token
+    - two_factor_code
+    - verify_key
+    type: object
   model.TwoFactorVerifycationInput:
     properties:
       two_factor_auth_type:
@@ -239,6 +254,36 @@ paths:
       summary: Verify two-factor authentication code
       tags:
       - accounts 2fa
+  /user/verify-2fa-otp:
+    post:
+      consumes:
+      - application/json
+      description: Verify the OTP for users who have enabled 2FA after login
+      parameters:
+      - description: payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/model.TwoFactorVerifyOtp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponseData'
+      summary: Verify Two-Factor Authentication OTP
+      tags:
+      - accounts user
   /user/verify-otp:
     post:
       consumes:
@@ -266,7 +311,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponseData'
-      summary: Verify OTP for user
+      summary: Verify OTP for user when user register
       tags:
       - accounts user
 swagger: "2.0"

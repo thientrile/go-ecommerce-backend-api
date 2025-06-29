@@ -7,6 +7,7 @@ import (
 	"github.com/segmentio/kafka-go"
 	"github.com/ulule/limiter/v3"
 	"go-ecommerce-backend-api.com/pkg/logger"
+	"github.com/prometheus/client_golang/prometheus"
 	"go-ecommerce-backend-api.com/pkg/setting"
 	"gorm.io/gorm"
 )
@@ -19,4 +20,5 @@ var (
 	MDBC           *sql.DB
 	KafkaProducers map[string]*kafka.Writer
 	Limiters       map[string]*limiter.Limiter
+	OpsProcessed   prometheus.Counter
 )

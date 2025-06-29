@@ -51,7 +51,10 @@ func Run() {
 	global.Logger.LogInitStart("Swagger Documentation")
 	r = InitSwagger(r)
 	global.Logger.LogInitStep("Swagger Documentation", true, nil)
-
+	// init prometheus
+	global.Logger.LogInitStart("Prometheus Monitoring")
+	r = InitPrometheus(r)
+	global.Logger.LogInitStep("Prometheus Monitoring", true, nil)
 	global.Logger.Info(fmt.Sprintf("🌐 Server listening on port %v", s.Port))
 	// r.Run(":8002") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	if err := r.Run(fmt.Sprintf(":%v", s.Port)); err != nil {

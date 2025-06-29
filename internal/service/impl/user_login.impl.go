@@ -31,10 +31,62 @@ type sUserLogin struct {
 }
 
 func NewUserLoginImpl(r *database.Queries) *sUserLogin {
-
 	return &sUserLogin{
 		r: r,
 	}
+}
+
+// sendOtp sends the OTP to the user's email or phone based on the authentication type.
+func (s *sUserLogin) VerifyTwoFactorAuthOTP(ctx context.Context, in *model.TwoFactorVerifyOtp) (codeStatus int, out model.LoginOutput, err error) {
+
+	//check userId is valid
+	userBaseFound, err := s.r.GetOneUserInfo(ctx, in.VerifyKey)
+	if err != nil {
+		return response.ErrCodeAuthenticationFailed, out, nil
+	}
+	isTwoFactorEnabled, err := s.r.IsTwoFactorEnabled(ctx, int32(userBaseFound.UserID))
+	if err != nil {
+		global.Logger.Error("Error checking two-factor authentication status: ", zap.Error(err))
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to check two-factor authentication status: %v", err)
+	}
+	if isTwoFactorEnabled == 0 {
+		return response.ErrCodeTwoFactorAuthVerifyFailded, out, fmt.Errorf("two-factor authentication is not enabled for this user")
+	}
+	//check otp is valid
+	KeyUserTwoFator := utils.GetUserKey(in.TwoFactorAuthToken)
+	if err := validateOTP(ctx, KeyUserTwoFator, in.TwoFactorCode); err != nil {
+		global.Logger.Error("Error validating OTP: ", zap.Error(err))
+		return response.ErrCodeTwoFactorAuthVerifyFailded, out, fmt.Errorf("OTP verification failed:%v", err)
+	}
+
+	// create token
+	// 5 create UUID
+	subToken := utils.GenerateUUID(int(userBaseFound.UserID))
+	// 6. get user info
+	userInfo, err := s.r.GetUser(ctx, uint64(userBaseFound.UserID))
+	if err != nil {
+		global.Logger.Error("Error getting user info: ", zap.Error(err))
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to get user info: %v", err)
+	}
+	// 7. conver to json
+	infoUserJson, err := json.Marshal(userInfo)
+	if err != nil {
+
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to marshal user info: %v", err)
+	}
+	// 8. give infoUser to redis with key =subToken
+	err = global.RDB.Set(ctx, subToken, infoUserJson, time.Duration(consts.TIME_LOGIN_LIFE)*time.Minute).Err()
+	if err != nil {
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to set user info in Redis: %v", err)
+	}
+	// 9. create token
+	token, err := auth.CreateToken(subToken)
+	if err != nil {
+		return response.ErrCodeAuthenticationFailed, out, err
+	}
+	out.Token = token
+
+	return response.ErrCodeSuccess, out, nil
 }
 
 // ---- Two-Factor Authentication ----
@@ -135,9 +187,6 @@ func (s *sUserLogin) VerifyTwoFactorAuth(ctx context.Context, in *model.TwoFacto
 	}
 	return response.ErrCodeSuccess, nil
 }
-func (s *sUserLogin) VerifyTwoFactorAuthOTP(ctx context.Context, in *model.TwoFactorVerifyOtp) (codeStatus int, out model.LoginOutput, err error) {
-	return response.ErrCodeTwoFactorAuthVerifyFailded, out, nil
-}
 
 // validateOTP handles OTP validation and attempt counting for two-factor authentication.
 
@@ -151,6 +200,10 @@ func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatu
 	if err != nil {
 		return response.ErrCodeAuthenticationFailed, out, nil
 	}
+	if strings.TrimSpace(userBaseFound.UserAccount) == "" || userBaseFound.UserAccount != in.Username {
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("username mismatch")
+	}
+
 	// check password
 	if !crypto.MatchingPassword(userBaseFound.UserPassword, in.Password, userBaseFound.UserSalt) {
 		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("does not match password")
@@ -162,34 +215,7 @@ func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatu
 		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to check two-factor authentication status: %v", err)
 	}
 	if isTwoFactorEnabled > 0 {
-		// found two-factor authentication is enabled for this user
-		foundFactorMethods, err := s.r.GetUserFactorMethods(ctx, int32(userBaseFound.UserID))
-		if err != nil {
-			global.Logger.Error("Error getting two-factor method: ", zap.Error(err))
-			return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to get two-factor method: %v", err)
-		}
-		if len(foundFactorMethods) == 0 {
-			global.Logger.Error("No two-factor methods found for user")
-			return response.ErrCodeTwoFactorEnabled, out, fmt.Errorf("no two-factor methods found for user")
-		}
-		authType := convertAuthType(string(foundFactorMethods[0].TwoFactorAuthType))
-		key := map[int]string{
-			consts.EMAIL: foundFactorMethods[0].TwoFactorEmail.String,
-			consts.SMS:   foundFactorMethods[0].TwoFactorPhone.String,
-		}
-		// set OTP for two-factor authentication
-		str := fmt.Sprintf("%s-%d", strings.ToLower(key[authType]), userBaseFound.UserID)
-		hashKey := crypto.GetHash(str)
-		// hashKey := crypto.GetHash(strconv.FormatUint(uint64(userBaseFound.UserID), 10))
-		KeyUserTwoFator := utils.GetUserKey(hashKey)
-		otpNew := random.GenerateSixDigitOTP()
-		go global.RDB.SetEx(ctx, KeyUserTwoFator, otpNew, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
-		// send OTP to user
-
-		go sendOtp(key[authType], authType, strconv.Itoa(otpNew))
-		out.Message = fmt.Sprintf("Two-factor authentication is enabled. Please verify your OTP sent to %s", foundFactorMethods[0].TwoFactorAuthType)
-		out.Token = hashKey
-		return response.ErrCodeSuccess, out, nil
+		return s.handleTwoFactorLogin(ctx, in, &userBaseFound)
 	}
 	//get ip address from context
 	ipClient := ctx.Value("IpAddress")
@@ -230,6 +256,45 @@ func (s *sUserLogin) Login(ctx context.Context, in *model.LoginInput) (codeStatu
 	return response.ErrCodeSuccess, out, nil
 }
 
+// handleTwoFactorLogin handles the two-factor authentication logic for Login.
+func (s *sUserLogin) handleTwoFactorLogin(ctx context.Context, in *model.LoginInput, userBaseFound *database.GetOneUserInfoRow) (codeStatus int, out model.LoginOutput, err error) {
+	foundFactorMethods, err := s.r.GetUserFactorMethods(ctx, int32(userBaseFound.UserID))
+	if err != nil {
+		global.Logger.Error("Error getting two-factor method: ", zap.Error(err))
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to get two-factor method: %v", err)
+	}
+	if len(foundFactorMethods) == 0 {
+		global.Logger.Error("No two-factor methods found for user")
+		return response.ErrCodeTwoFactorEnabled, out, fmt.Errorf("no two-factor methods found for user")
+	}
+	authType := convertAuthType(string(foundFactorMethods[0].TwoFactorAuthType))
+	key := map[int]string{
+		consts.EMAIL: foundFactorMethods[0].TwoFactorEmail.String,
+		consts.SMS:   foundFactorMethods[0].TwoFactorPhone.String,
+	}
+	// set OTP for two-factor authentication
+	str := fmt.Sprintf("%s-%d", strings.ToLower(in.Username), userBaseFound.UserID)
+	hashKey := crypto.GetHash(str)
+	KeyUserTwoFator := utils.GetUserKey(hashKey)
+	fmt.Printf("KeyUserTwoFator: %s\n", KeyUserTwoFator)
+	otpNew := random.GenerateSixDigitOTP()
+	fmt.Printf("Generated OTP for two-factor authentication: %d\n", otpNew)
+	result, err := global.RDB.SetNX(ctx, KeyUserTwoFator, otpNew, time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Result()
+	// send OTP to user
+	if err != nil {
+		global.Logger.Error("Error setting OTP in Redis: ", zap.Error(err))
+		return response.ErrCodeAuthenticationFailed, out, fmt.Errorf("failed to set OTP in Redis: %v", err)
+	}
+	if !result {
+		global.Logger.Error("OTP already exists  for user", zap.String("user", in.Username))
+		return response.ErrCodeOTPExisted, out, fmt.Errorf("OTP already exists for user: %v", in.Username)
+	}
+	go sendOtp(key[authType], authType, strconv.Itoa(otpNew))
+	out.Message = fmt.Sprintf("Two-factor authentication is enabled. Please verify your OTP sent to %s", foundFactorMethods[0].TwoFactorAuthType)
+	out.Token = hashKey
+	return response.ErrCodeTwoFactorEnabled, out, nil
+}
+
 // Register handles user registration and OTP verification.
 // It generates an OTP, saves it in Redis, and sends it to the user's email.
 func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (codeResult int, err error) {
@@ -264,9 +329,14 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 	fmt.Printf("Generated OTP: %d\n", optNew)
 	// 3. save OTP in Redis with expiration time
 
-	err = global.RDB.SetEx(ctx, userKey, strconv.Itoa(optNew), time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Err()
+	result, err := global.RDB.SetNX(ctx, userKey, strconv.Itoa(optNew), time.Duration(consts.TIME_OTP_REGISTER)*time.Minute).Result()
 	if err != nil {
+		global.Logger.Error("Error setting OTP in Redis: ", zap.Error(err))
 		return response.ErrInvalidOTP, err
+	}
+	if !result {
+		global.Logger.Error("OTP already exists for user", zap.String("user", in.VerifyKey))
+		return response.ErrCodeSendEmailOtp, fmt.Errorf("OTP already exists for user")
 	}
 
 	// 4. check if otp exists in database
@@ -276,7 +346,7 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 	}
 
 	// 7. save user to database
-	result, err := s.r.InsertOTPVerify(ctx, database.InsertOTPVerifyParams{
+	sqlResult, err := s.r.InsertOTPVerify(ctx, database.InsertOTPVerifyParams{
 		VerifyOtp:     strconv.Itoa(optNew),
 		VerifyType:    sql.NullInt32{Int32: 1, Valid: true},
 		VerifyKey:     in.VerifyKey,
@@ -286,7 +356,7 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 		return response.ErrCodeSendEmailOtp, err
 	}
 	// 8. getlast id
-	lastIdVerify, err := result.LastInsertId()
+	lastIdVerify, err := sqlResult.LastInsertId()
 	if err != nil {
 		return response.ErrCodeSendEmailOtp, err
 	}
@@ -294,6 +364,7 @@ func (s *sUserLogin) Register(ctx context.Context, in *model.RegisterInput) (cod
 
 	return response.ErrCodeSuccess, nil
 }
+
 func (s *sUserLogin) VerifyOTP(ctx context.Context, in *model.VerifyInput) (out model.VerifyOtpOutput, err error) {
 	// Implement login logic
 

@@ -112,6 +112,8 @@ Comprehensive documentation is available in the `docs/` directory:
 - **[Development Guide](docs/development-guide.md)**: Development workflow and project structure
 - **[Deployment Guide](docs/deployment-guide.md)**: Production deployment strategies
 - **[API Documentation](docs/api-documentation.md)**: Complete API reference and examples
+- **[Monitoring Guide](docs/monitoring-guide.md)**: Prometheus & Grafana monitoring setup
+- **[Logging Guide](docs/logging-guide.md)**: Application logging and troubleshooting
 
 ## 🔧 Available Commands
 
@@ -155,6 +157,8 @@ make test              # Run tests
 make test-domains      # Test domain configuration
 make check-backends    # Check backend health
 make logs              # View Docker logs
+make monitoring        # Start monitoring services
+make stop-monitoring   # Stop monitoring services
 ```
 
 ## 🌍 Environment Configuration
@@ -226,6 +230,26 @@ The application includes the following Docker services:
 | **redis** | 6379 | Caching and session storage |
 | **kafka** | 9092 | Message broker |
 | **kafka-ui** | 8080 | Kafka management interface |
+| **prometheus** | 9090 | Metrics collection and storage |
+| **grafana** | 3000 | Metrics visualization and dashboards |
+| **mysql-exporter** | 9104 | MySQL metrics exporter |
+| **redis-exporter** | 9121 | Redis metrics exporter |
+| **node-exporter** | 9100 | System metrics exporter |
+| **kafka-exporter** | 9308 | Kafka metrics exporter |
+
+### 📊 Monitoring Stack
+
+The application includes a comprehensive monitoring solution:
+
+- **Prometheus**: Collects metrics from all services
+- **Grafana**: Provides beautiful dashboards and visualization
+- **Exporters**: Specialized metric collectors for each service
+- **Alerting**: Configurable alerts for system health
+
+**Access URLs:**
+- Grafana Dashboard: http://localhost:3000 (admin/admin123)
+- Prometheus: http://localhost:9090
+- For detailed setup: See [Monitoring Guide](docs/monitoring-guide.md)
 
 ## 📁 Project Structure
 

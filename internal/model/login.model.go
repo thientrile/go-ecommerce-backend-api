@@ -39,6 +39,7 @@ type TwoFactorVerifycationInput struct {
 	TwoFactorAuthType int    `json:"two_factor_auth_type" binding:"required"` // 1:"email" and 2:"sms" or 3:"app"
 }
 type TwoFactorVerifyOtp struct {
+	VerifyKey          string `json:"verify_key" binding:"required"`      // the key to verify
 	TwoFactorCode      string `json:"two_factor_code" binding:"required"` // the code to verify
-	TwoFactorAuthToken int    `json:"two_factor_auth_type" binding:"required"`
+	TwoFactorAuthToken string `json:"two_factor_auth_token" binding:"required"`
 }

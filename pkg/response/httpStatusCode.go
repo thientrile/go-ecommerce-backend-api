@@ -13,12 +13,17 @@ const (
 	ErrCodeUserOtpNotExist = 60008 // OTP exists but is not valid
 	ErrCodeUserNotExist    = 60009 // User does not exist
 	ErrCodeTwoFactorEnabled = 60012 // Two-factor authentication is enabled
+	ErrCodeOTPExisted	 = 60013 // OTP already exists for user
 	//authentication
 	ErrCodeAuthenticationFailed  = 60010 // Authentication failed
 	ErrCodeAuthenticationSuccess = 60011 // Authentication success
 	// two factor authentication
 	ErrCodeTwoFactorAuthFailed        = 80001 // Two factor authentication failed
 	ErrCodeTwoFactorAuthVerifyFailded = 80002 // Two factor authentication success
+	// rate limit
+	ErrCodeRateLimitExceeded = 90001 // Rate limit exceeded
+	ErrCodeRateLimitNotFound = 90002 // Rate limit not found
+	ErrCodeRateLimitError    = 90003 // Rate limit error
 )
 
 var msg = map[int]string{
@@ -37,6 +42,11 @@ var msg = map[int]string{
 	ErrCodeAuthenticationFailed:  "Authentication failed",
 	ErrCodeAuthenticationSuccess: "Authentication success",
 	// two factor authentication
-	ErrCodeTwoFactorAuthFailed:        "Two factor authentication failed",
 	ErrCodeTwoFactorAuthVerifyFailded: "Two factor authentication verification failed",
+
+	// rate limit
+	ErrCodeRateLimitExceeded: "Rate limit exceeded",
+	ErrCodeRateLimitNotFound: "Rate limit not found",
+	ErrCodeRateLimitError:    "Rate limit error",
+	ErrCodeOTPExisted: "OTP already exists for user",
 }

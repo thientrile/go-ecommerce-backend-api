@@ -71,8 +71,8 @@ limiter:
       rate: "10-M"
       description: "Authentication endpoints (login/register)"
       enabled: true
-      burst_multiplier: 2
-      
+      burst_multiplier: 2    
+  
     upload:
       rate: "5-M"
       description: "File upload endpoints"
@@ -91,5 +91,4 @@ limiter:
       enabled: true
       ip_whitelist: ["192.168.1.0/24"]      
   url_path:
-    public: ["/v1/2025/user/login", "/v1/2025/user/register", "/v1/2025/user/update-password-register", "/v1/2025/user/verify-otp"]
-    private: ["/v1/2025/user/setup-2fa", "/v1/2025/user/profile", "/v1/2025/user/verify-2fa"]
+    auth: ["/v1/2025/user/login", "/v1/2025/user/register", "/v1/2025/user/update-password-register", "/v1/2025/user/verify-otp","/v1/2025/user/verify-2fa-otp"]

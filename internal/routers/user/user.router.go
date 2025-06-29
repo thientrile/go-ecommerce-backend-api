@@ -28,6 +28,7 @@ func (pr *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
 		userRouterPublic.POST("/login", account.Login.Login)                                     // Register a new user -> Yes ->No
 		userRouterPublic.POST("/verify-otp", account.Login.VerifyOTP)                            // Verify OTP for user -> Yes ->No
 		userRouterPublic.POST("/update-password-register", account.Login.UpdatePasswordRegister) // Verify OTP for user -> Yes ->No
+		userRouterPublic.POST("/verify-2fa-otp", account.Login.VerifyTwoFactorAuthOTP)           // Verify Two-Factor Authentication OTP -> Yes ->No
 	}
 
 	// private router

@@ -17,7 +17,32 @@ var Login = new(cUserLogin)
 type cUserLogin struct{}
 
 
-
+//
+// Verify Two-Factor Authentication OTP documentation
+//
+// @Summary      Verify Two-Factor Authentication OTP
+// @Description  Verify the OTP for users who have enabled 2FA after login
+// @Tags         accounts user
+// @Accept       json
+// @Produce      json
+// @Param        payload body model.TwoFactorVerifyOtp true "payload"
+// @Success      200  {object}   response.ErrorResponseData
+// @Failure      400  {object}  response.ErrorResponseData
+// @Failure      500  {object}  response.ErrorResponseData
+// @Router       /user/verify-2fa-otp [post]
+func (c *cUserLogin) VerifyTwoFactorAuthOTP(ctx *gin.Context) {
+	var params model.TwoFactorVerifyOtp
+	if !utils.CheckValidParams(ctx, &params) {
+		return
+	}
+	codeStatus, payload, err := service.UserLogin().VerifyTwoFactorAuthOTP(ctx, &params)
+	if err != nil {
+		global.Logger.Error("Error verifying Two-Factor Authentication OTP: ", zap.Error(err))
+		response.ErrorResponse(ctx, codeStatus, "")
+		return
+	}
+	response.SuccessResponse(ctx, codeStatus, payload)
+}
 
 // UpdatePasswordRegister documentation
 //
@@ -75,7 +100,7 @@ func (c *cUserLogin) Login(ctx *gin.Context) {
 
 // Verify OTP documentation
 //
-// @Summary      Verify OTP for user
+// @Summary      Verify OTP for user when user register
 // @Description  Verify the OTP sent to the user
 // @Tags         accounts user
 // @Accept       json
@@ -126,5 +151,3 @@ func (c *cUserLogin) Register(ctx *gin.Context) {
 	}
 	response.SuccessResponse(ctx, response.ErrCodeSuccess, nil)
 }
-
-

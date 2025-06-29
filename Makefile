@@ -76,9 +76,14 @@ help:
 	@echo "  goose-up      - Run migrations"
 	@echo "  goose-down    - Rollback last migration"
 	@echo "  goose-reset   - Reset all migrations"
-	@echo ""	@echo "DEVELOPMENT TOOLS:"
-	@echo "  sqlgen        - Generate SQL code with sqlc"
+	@echo ""	@echo "DEVELOPMENT TOOLS:"	@echo "  sqlgen        - Generate SQL code with sqlc"
 	@echo "  swag          - Generate Swagger documentation"
+	@echo ""
+	@echo "MONITORING COMMANDS:"
+	@echo "  monitoring            - Start monitoring services (Prometheus, Grafana)"
+	@echo "  monitoring-down       - Stop monitoring services"
+	@echo "  monitoring-status     - Check monitoring services status"
+	@echo "  monitoring-logs       - View monitoring services logs"
 	@echo ""
 	@echo "DEBEZIUM COMMANDS:"
 	@echo "  debezium-register     - Register MySQL connector with Debezium"
@@ -347,6 +352,50 @@ swag:
 
 
 # -------------------------
+# Monitoring Management
+# -------------------------
+
+# Start all monitoring services
+monitoring:
+	@echo "[INFO] Starting monitoring services (Prometheus, Grafana, Exporters)..."
+	@docker-compose --profile dev up -d prometheus grafana redis-exporter node-exporter kafka-exporter
+	@echo "[SUCCESS] Monitoring services started!"
+	@echo ""
+	@echo "Access URLs:"
+	@echo "  • Grafana:    http://localhost:3000 (admin/admin123)"
+	@echo "  • Prometheus: http://localhost:9090"
+	@echo ""
+	@echo "Metrics Exporters:"
+	@echo "  • Node (System):  http://localhost:9100/metrics"
+	@echo "  • Redis:          http://localhost:9121/metrics"
+	@echo "  • Kafka:          http://localhost:9308/metrics"
+	@echo "  • MySQL:          http://localhost:9104/metrics (may need config)"
+	@echo ""
+	@echo "See docs/monitoring-guide.md for detailed setup"
+
+# Start monitoring services (alias)
+monitoring-up: monitoring
+
+# Stop monitoring services
+monitoring-down:
+	@echo "[INFO] Stopping monitoring services..."
+	@docker-compose stop prometheus grafana mysql-exporter redis-exporter node-exporter kafka-exporter
+	@echo "[SUCCESS] Monitoring services stopped!"
+
+# Check monitoring services status
+monitoring-status:
+	@echo "[INFO] Checking monitoring services status..."
+	@docker-compose ps prometheus grafana redis-exporter node-exporter kafka-exporter
+
+# View monitoring services logs
+monitoring-logs:
+	@echo "[INFO] Viewing monitoring services logs..."
+	@docker-compose logs -f prometheus grafana mysql-exporter redis-exporter node-exporter kafka-exporter
+
+# Stop monitoring services (alias)
+stop-monitoring: monitoring-down
+
+# -------------------------
 # Debezium Management
 # -------------------------
 
@@ -433,5 +482,5 @@ endif
 	dump-schema dump-full \
 	goose-create goose-up goose-down goose-reset goose-up-by-one \
 	sqlgen swag start stop restart status stop-all switch-to-dev switch-to-prod \
-	debezium-register debezium-status debezium-delete debezium-restart debezium-connectors debezium-health debezium-setup\
+	monitoring monitoring-up monitoring-down monitoring-status monitoring-logs \
 	debezium-register debezium-status debezium-delete debezium-restart debezium-connectors debezium-health debezium-setup

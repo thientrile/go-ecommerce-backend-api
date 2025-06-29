@@ -28,8 +28,8 @@ func InitRouter() *gin.Engine {
 
 	// Initialize rate limiter once
 
-	r.Use(middlewares.NewRateLimiter().GlobalRateLimiter()) // limiter global.Config.Limiter
-	r.Use(middlewares.LoggerMiddleware())                   // logger - đã sử dụng custom logger middleware ở trên
+	r.Use(middlewares.NewRateLimiter().DynamicRateLimiter()) // limiter global.Config.Limiter
+	r.Use(middlewares.LoggerMiddleware())                    // logger - đã sử dụng custom logger middleware ở trên
 	managerRouter := routers.RouterGroupApp.Manager
 	userRouter := routers.RouterGroupApp.User
 

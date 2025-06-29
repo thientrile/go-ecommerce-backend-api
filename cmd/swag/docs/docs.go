@@ -259,6 +259,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/verify-2fa-otp": {
+            "post": {
+                "description": "Verify the OTP for users who have enabled 2FA after login",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts user"
+                ],
+                "summary": "Verify Two-Factor Authentication OTP",
+                "parameters": [
+                    {
+                        "description": "payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.TwoFactorVerifyOtp"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/user/verify-otp": {
             "post": {
                 "description": "Verify the OTP sent to the user",
@@ -271,7 +317,7 @@ const docTemplate = `{
                 "tags": [
                     "accounts user"
                 ],
-                "summary": "Verify OTP for user",
+                "summary": "Verify OTP for user when user register",
                 "parameters": [
                     {
                         "description": "payload",
@@ -353,6 +399,27 @@ const docTemplate = `{
                 },
                 "two_factor_email": {
                     "description": "required if TwoFactorAuthType is \"email\"",
+                    "type": "string"
+                }
+            }
+        },
+        "model.TwoFactorVerifyOtp": {
+            "type": "object",
+            "required": [
+                "two_factor_auth_token",
+                "two_factor_code",
+                "verify_key"
+            ],
+            "properties": {
+                "two_factor_auth_token": {
+                    "type": "string"
+                },
+                "two_factor_code": {
+                    "description": "the code to verify",
+                    "type": "string"
+                },
+                "verify_key": {
+                    "description": "the key to verify",
                     "type": "string"
                 }
             }
