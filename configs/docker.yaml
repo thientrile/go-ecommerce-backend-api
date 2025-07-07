@@ -1,7 +1,7 @@
 server:
   port: 8002
   domain: "crm.shopdev.com"
-  mode: dev # Chế độ chạy: dev, prod
+  mode: docker # Chế độ chạy: dev, prod
 mysql:
   host: go-ecommerce-mysql #127.0.0.1
   port: 3306 #3306

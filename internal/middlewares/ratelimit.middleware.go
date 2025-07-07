@@ -106,7 +106,7 @@ func (rl *RateLimiters) filterPathUrl(url string) string {
 	}
 
 	// Fallback to global nếu không match với group nào
-	global.Logger.Debug("URL fallback to global", zap.String("url", url))
+	// global.Logger.Debug("URL fallback to global", zap.String("url", url))
 	return "global"
 }
 

@@ -36,11 +36,27 @@ func HandleRedisGetOTPError(err error, otpFound string) (responseCode int, errRe
 }
 
 func CheckValidParams(ctx *gin.Context, params interface{}) bool {
-	if err := ctx.ShouldBind(&params); err != nil {
-		fmt.Println("Error binding params: ", err)
-		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, err.Error())
+	// 1. Bind từ URI
+	if err := ctx.ShouldBindUri(params); err != nil {
+		fmt.Println("URI binding failed:", err)
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, "Invalid path parameter: "+err.Error())
 		return false
 	}
+
+	// 2. Bind từ query param
+	if err := ctx.ShouldBindQuery(params); err != nil {
+		fmt.Println("Query binding failed:", err)
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, "Invalid query parameter: "+err.Error())
+		return false
+	}
+
+	// 3. Bind từ JSON hoặc form body
+	if err := ctx.ShouldBind(params); err != nil {
+		fmt.Println("Body binding failed:", err)
+		response.ErrorResponse(ctx, response.ErrCodeParamInvalid, "Invalid body parameter: "+err.Error())
+		return false
+	}
+
 	return true
 }
 
@@ -57,4 +73,3 @@ func GenerateUUID(userId int) string {
 	uuidString := strings.ReplaceAll(newUUID.String(), "-", text)
 	return strconv.Itoa(userId) + "_" + uuidString
 }
-

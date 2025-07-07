@@ -173,54 +173,54 @@ services:
       retries: 3
 
   # Redis Exporter - Cache Metrics
-  redis-exporter:
-    image: oliver006/redis_exporter:latest
-    container_name: go-ecommerce-redis-exporter-dev
-    ports:
-      - "9121:9121"
-    environment:
-      - REDIS_ADDR=redis://redis:6379
-      - REDIS_PASSWORD=strongredispass
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - go-ecommerce-network-dev
-    restart: unless-stopped
+  # redis-exporter:
+  #   image: oliver006/redis_exporter:latest
+  #   container_name: go-ecommerce-redis-exporter-dev
+  #   ports:
+  #     - "9121:9121"
+  #   environment:
+  #     - REDIS_ADDR=redis://redis:6379
+  #     - REDIS_PASSWORD=strongredispass
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - go-ecommerce-network-dev
+  #   restart: unless-stopped
 
-  # Node Exporter - System Metrics
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: go-ecommerce-node-exporter-dev
-    ports:
-      - "9100:9100"
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    networks:
-      - go-ecommerce-network-dev
-    restart: unless-stopped
+  # # Node Exporter - System Metrics
+  # node-exporter:
+  #   image: prom/node-exporter:latest
+  #   container_name: go-ecommerce-node-exporter-dev
+  #   ports:
+  #     - "9100:9100"
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.rootfs=/rootfs'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   networks:
+  #     - go-ecommerce-network-dev
+  #   restart: unless-stopped
 
-  # Kafka Exporter - Message Queue Metrics
-  kafka-exporter:
-    image: danielqsj/kafka-exporter:latest
-    container_name: go-ecommerce-kafka-exporter-dev
-    ports:
-      - "9308:9308"
-    command:
-      - '--kafka.server=kafka:9092'
-    depends_on:
-      kafka:
-        condition: service_healthy
-    networks:
-      - go-ecommerce-network-dev
-    restart: unless-stopped
+  # # Kafka Exporter - Message Queue Metrics
+  # kafka-exporter:
+  #   image: danielqsj/kafka-exporter:latest
+  #   container_name: go-ecommerce-kafka-exporter-dev
+  #   ports:
+  #     - "9308:9308"
+  #   command:
+  #     - '--kafka.server=kafka:9092'
+  #   depends_on:
+  #     kafka:
+  #       condition: service_healthy
+  #   networks:
+  #     - go-ecommerce-network-dev
+  #   restart: unless-stopped
 
 volumes:
   mysql-data-dev:

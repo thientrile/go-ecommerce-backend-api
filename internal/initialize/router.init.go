@@ -30,6 +30,7 @@ func InitRouter() *gin.Engine {
 
 	r.Use(middlewares.NewRateLimiter().DynamicRateLimiter()) // limiter global.Config.Limiter
 	r.Use(middlewares.LoggerMiddleware())                    // logger - đã sử dụng custom logger middleware ở trên
+	r.Use(middlewares.AccessLoggerMiddleware())              // access logging cho tất cả requests
 	managerRouter := routers.RouterGroupApp.Manager
 	userRouter := routers.RouterGroupApp.User
 
@@ -45,6 +46,7 @@ func InitRouter() *gin.Engine {
 		// user router
 		userRouter.InitUserRouter(MainGroup)
 		userRouter.InitProductRouter(MainGroup)
+		userRouter.InitTicketRouter(MainGroup)
 
 	}
 	{

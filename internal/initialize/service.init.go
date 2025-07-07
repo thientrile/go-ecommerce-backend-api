@@ -9,5 +9,8 @@ import (
 
 func InitServiceInterface() {
 	queries := database.New(global.MDBC)
+	// Initialize UserLogin service
 	service.InitUserLogin(impl.NewUserLoginImpl(queries))
+	// Initialize TicketHome service
+	service.InitTicketItem(impl.NewTicketItem(queries))
 }

@@ -1,6 +1,7 @@
 package user
 
-type UserRouterGroup struct{
+type UserRouterGroup struct {
 	UserRouter
 	ProductRouter
+	TicketRouter
 }

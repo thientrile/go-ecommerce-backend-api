@@ -4,6 +4,50 @@
         "contact": {}
     },
     "paths": {
+        "/ticket/item/{id}": {
+            "get": {
+                "description": "Lấy thông tin chi tiết của ticket item theo ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TicketItem"
+                ],
+                "summary": "Get Ticket Item By ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Ticket Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GetTicketItemByIdOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponseData"
+                        }
+                    }
+                }
+            }
+        },
         "/user/login": {
             "post": {
                 "description": "Login user and return authentication token",
@@ -342,6 +386,23 @@
         }
     },
     "definitions": {
+        "model.GetTicketItemByIdOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "stock_available": {
+                    "type": "integer"
+                },
+                "stock_initial": {
+                    "type": "integer"
+                },
+                "ticket_name": {
+                    "type": "string"
+                }
+            }
+        },
         "model.LoginInput": {
             "type": "object",
             "required": [

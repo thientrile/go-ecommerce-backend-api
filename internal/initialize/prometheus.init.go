@@ -16,7 +16,7 @@ var (
 )
 
 func InitPrometheus(r *gin.Engine) *gin.Engine {
-	prometheus.MustRegister(OpsProcessed)
+	// prometheus.MustRegister(OpsProcessed)
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	global.OpsProcessed = OpsProcessed
 	return r

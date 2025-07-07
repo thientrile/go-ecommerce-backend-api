@@ -16,5 +16,4 @@ func (pr *ProductRouter) InitProductRouter(Router *gin.RouterGroup) {
 
 	// private router
 
-	
 }

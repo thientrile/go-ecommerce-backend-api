@@ -63,21 +63,80 @@ func NewLogger(config setting.LoggerSetting, server setting.ServerSetting) *Logg
 	// Tạo encoder cho console (human-readable format)
 	consoleEncoder := getConsoleEncoderLog()
 
-	hook := lumberjack.Logger{
-		Filename:   fmt.Sprintf("%s/%s_%s.log", config.File_log_path, config.File_log_name, version), // log file name
-		MaxSize:    config.Max_size,                                                                  // megabytes
-		MaxBackups: config.Max_backups,
-		MaxAge:     config.Max_age,  //days
-		Compress:   config.Compress, // disabled by default
+	env := os.Getenv("ENV")
+	if env == "" {
+		env = "dev"
 	}
 
-	// Console core với format đẹp
-	consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level)
-	// File core với JSON format
-	fileCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(&hook), level)
+	// Tạo thư mục logs theo env và ngày
+	today := time.Now().Format("2006-01-02")
+	logDir := fmt.Sprintf("%s/%s/%s", config.File_log_path, env, today)
+	os.MkdirAll(logDir, 0755)
 
-	// Kết hợp cả 2 cores
-	core := zapcore.NewTee(consoleCore, fileCore)
+	// Tạo multiple cores cho từng loại log
+	cores := []zapcore.Core{}
+
+	// 1. Console core (luôn có)
+	consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), level)
+	cores = append(cores, consoleCore)
+
+	// 2. All logs (tất cả logs)
+	allLogHook := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("%s/all_%s.log", logDir, version),
+		MaxSize:    config.Max_size,
+		MaxBackups: config.Max_backups,
+		MaxAge:     config.Max_age,
+		Compress:   config.Compress,
+	}
+	allCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(allLogHook), level)
+	cores = append(cores, allCore)
+
+	// 3. Error logs (chỉ error và fatal)
+	errorLogHook := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("%s/error_%s.log", logDir, version),
+		MaxSize:    config.Max_size,
+		MaxBackups: config.Max_backups,
+		MaxAge:     config.Max_age,
+		Compress:   config.Compress,
+	}
+	errorCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(errorLogHook), zapcore.ErrorLevel)
+	cores = append(cores, errorCore)
+
+	// 4. Access logs (HTTP requests) - INFO level
+	accessLogHook := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("%s/access_%s.log", logDir, version),
+		MaxSize:    config.Max_size,
+		MaxBackups: config.Max_backups,
+		MaxAge:     config.Max_age,
+		Compress:   config.Compress,
+	}
+	accessCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(accessLogHook), zapcore.InfoLevel)
+	cores = append(cores, accessCore)
+
+	// 5. Auth logs (authentication/authorization)
+	authLogHook := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("%s/auth_%s.log", logDir, version),
+		MaxSize:    config.Max_size,
+		MaxBackups: config.Max_backups,
+		MaxAge:     config.Max_age,
+		Compress:   config.Compress,
+	}
+	authCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(authLogHook), zapcore.InfoLevel)
+	cores = append(cores, authCore)
+
+	// 6. Database logs
+	dbLogHook := &lumberjack.Logger{
+		Filename:   fmt.Sprintf("%s/database_%s.log", logDir, version),
+		MaxSize:    config.Max_size,
+		MaxBackups: config.Max_backups,
+		MaxAge:     config.Max_age,
+		Compress:   config.Compress,
+	}
+	dbCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(dbLogHook), zapcore.InfoLevel)
+	cores = append(cores, dbCore)
+
+	// Kết hợp tất cả cores
+	core := zapcore.NewTee(cores...)
 
 	return &LoggerZap{zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))}
 }
@@ -261,4 +320,163 @@ func (l *LoggerZap) LogShutdown(reason string) {
 	goodbyeColor := color.New(color.FgCyan, color.Bold)
 	goodbyeColor.Println("\n🛑 Server shutdown complete. Goodbye!")
 	fmt.Println(strings.Repeat("═", 40))
+}
+
+// =====================================================
+// SPECIALIZED LOGGING METHODS FOR DIFFERENT LOG TYPES
+// =====================================================
+
+// LogAuth logs authentication and authorization events
+func (l *LoggerZap) LogAuth(action, userID, ip, userAgent string, success bool, details string) {
+	fields := []zap.Field{
+		zap.String("type", "auth"),
+		zap.String("action", action),
+		zap.String("user_id", userID),
+		zap.String("ip", ip),
+		zap.String("user_agent", userAgent),
+		zap.Bool("success", success),
+		zap.String("details", details),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	if success {
+		l.Info(fmt.Sprintf("AUTH SUCCESS: %s", action), fields...)
+	} else {
+		l.Warn(fmt.Sprintf("AUTH FAILED: %s", action), fields...)
+	}
+}
+
+// LogAccess logs HTTP access requests
+func (l *LoggerZap) LogAccess(method, path, ip, userAgent string, status int, duration time.Duration, userID string) {
+	fields := []zap.Field{
+		zap.String("type", "access"),
+		zap.String("method", method),
+		zap.String("path", path),
+		zap.String("ip", ip),
+		zap.String("user_agent", userAgent),
+		zap.Int("status", status),
+		zap.Duration("duration", duration),
+		zap.String("user_id", userID),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	var statusIcon string
+	switch {
+	case status >= 200 && status < 300:
+		statusIcon = "✅"
+		l.Info(fmt.Sprintf("%s %s %s [%d]", statusIcon, method, path, status), fields...)
+	case status >= 300 && status < 400:
+		statusIcon = "↩️"
+		l.Info(fmt.Sprintf("%s %s %s [%d]", statusIcon, method, path, status), fields...)
+	case status >= 400 && status < 500:
+		statusIcon = "⚠️"
+		l.Warn(fmt.Sprintf("%s %s %s [%d]", statusIcon, method, path, status), fields...)
+	default:
+		statusIcon = "❌"
+		l.Error(fmt.Sprintf("%s %s %s [%d]", statusIcon, method, path, status), fields...)
+	}
+}
+
+// LogDatabase logs database operations
+func (l *LoggerZap) LogDatabase(operation, table, query string, duration time.Duration, affected int64, err error) {
+	fields := []zap.Field{
+		zap.String("type", "database"),
+		zap.String("operation", operation),
+		zap.String("table", table),
+		zap.String("query", query),
+		zap.Duration("duration", duration),
+		zap.Int64("affected_rows", affected),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	if err != nil {
+		fields = append(fields, zap.Error(err))
+		l.Error(fmt.Sprintf("DB ERROR: %s on %s", operation, table), fields...)
+	} else {
+		l.Info(fmt.Sprintf("DB SUCCESS: %s on %s", operation, table), fields...)
+	}
+}
+
+// LogPayment logs payment and financial operations
+func (l *LoggerZap) LogPayment(action, userID, orderID, amount, currency, gateway string, success bool, details string) {
+	fields := []zap.Field{
+		zap.String("type", "payment"),
+		zap.String("action", action),
+		zap.String("user_id", userID),
+		zap.String("order_id", orderID),
+		zap.String("amount", amount),
+		zap.String("currency", currency),
+		zap.String("gateway", gateway),
+		zap.Bool("success", success),
+		zap.String("details", details),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	if success {
+		l.Info(fmt.Sprintf("PAYMENT SUCCESS: %s - %s %s", action, amount, currency), fields...)
+	} else {
+		l.Error(fmt.Sprintf("PAYMENT FAILED: %s - %s %s", action, amount, currency), fields...)
+	}
+}
+
+// LogSecurity logs security events
+func (l *LoggerZap) LogSecurity(event, userID, ip, details string, severity string) {
+	fields := []zap.Field{
+		zap.String("type", "security"),
+		zap.String("event", event),
+		zap.String("user_id", userID),
+		zap.String("ip", ip),
+		zap.String("details", details),
+		zap.String("severity", severity),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	switch severity {
+	case "critical":
+		l.Error(fmt.Sprintf("🚨 SECURITY CRITICAL: %s", event), fields...)
+	case "high":
+		l.Warn(fmt.Sprintf("⚠️ SECURITY HIGH: %s", event), fields...)
+	case "medium":
+		l.Warn(fmt.Sprintf("⚠️ SECURITY MEDIUM: %s", event), fields...)
+	case "low":
+		l.Info(fmt.Sprintf("ℹ️ SECURITY LOW: %s", event), fields...)
+	default:
+		l.Info(fmt.Sprintf("🔒 SECURITY: %s", event), fields...)
+	}
+}
+
+// LogBusiness logs business logic events
+func (l *LoggerZap) LogBusiness(event, userID, details string, metadata map[string]interface{}) {
+	fields := []zap.Field{
+		zap.String("type", "business"),
+		zap.String("event", event),
+		zap.String("user_id", userID),
+		zap.String("details", details),
+		zap.Any("metadata", metadata),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	l.Info(fmt.Sprintf("BUSINESS: %s", event), fields...)
+}
+
+// LogSystem logs system events
+func (l *LoggerZap) LogSystem(component, event, details string, level string) {
+	fields := []zap.Field{
+		zap.String("type", "system"),
+		zap.String("component", component),
+		zap.String("event", event),
+		zap.String("details", details),
+		zap.Time("timestamp", time.Now()),
+	}
+
+	switch level {
+	case "error":
+		l.Error(fmt.Sprintf("SYSTEM ERROR [%s]: %s", component, event), fields...)
+	case "warn":
+		l.Warn(fmt.Sprintf("SYSTEM WARN [%s]: %s", component, event), fields...)
+	case "info":
+		l.Info(fmt.Sprintf("SYSTEM INFO [%s]: %s", component, event), fields...)
+	default:
+		l.Info(fmt.Sprintf("SYSTEM [%s]: %s", component, event), fields...)
+	}
 }

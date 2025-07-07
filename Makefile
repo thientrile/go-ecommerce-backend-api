@@ -73,9 +73,11 @@ help:
 	@echo "  dump-schema   - Backup database schema"
 	@echo "  dump-full     - Full database backup"
 	@echo "  goose-create  - Create new migration (use: make goose-create name=migration_name)"
-	@echo "  goose-up      - Run migrations"
+	@echo "  goose-up      - Run all pending migrations"
 	@echo "  goose-down    - Rollback last migration"
 	@echo "  goose-reset   - Reset all migrations"
+	@echo "  goose-status  - Check migration status"
+	@echo "  goose-version - Check current migration version"
 	@echo ""	@echo "DEVELOPMENT TOOLS:"	@echo "  sqlgen        - Generate SQL code with sqlc"
 	@echo "  swag          - Generate Swagger documentation"
 	@echo ""
@@ -311,30 +313,57 @@ dump-full:
 # -------------------------
 goose-create:
 	@echo "[INFO] Creating new migration: $(name)"
-	$(SET_ENV) GOOSE_DRIVER=$(GOOSE_DRIVER) && \
-	$(SET_ENV) GOOSE_DBSTRING=$(GOOSE_DBSTRING) && \
-	goose -dir=$(GOOSE_MIGRATION_DIR) create $(name) sql
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema create $(name) sql"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema create $(name) sql
+endif
 	@echo "[SUCCESS] Migration created."
 
 goose-up:
-	$(SET_ENV) GOOSE_DRIVER=$(GOOSE_DRIVER) && \
-	$(SET_ENV) GOOSE_DBSTRING=$(GOOSE_DBSTRING) && \
-	goose -dir=$(GOOSE_MIGRATION_DIR) up
+	@echo "[INFO] Running database migrations..."
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema up"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema up
+endif
 
 goose-down:
-	$(SET_ENV) GOOSE_DRIVER=$(GOOSE_DRIVER) && \
-	$(SET_ENV) GOOSE_DBSTRING=$(GOOSE_DBSTRING) && \
-	goose -dir=$(GOOSE_MIGRATION_DIR) down
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema down"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema down
+endif
 
 goose-reset:
-	$(SET_ENV) GOOSE_DRIVER=$(GOOSE_DRIVER) && \
-	$(SET_ENV) GOOSE_DBSTRING=$(GOOSE_DBSTRING) && \
-	goose -dir=$(GOOSE_MIGRATION_DIR) reset
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema reset"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema reset
+endif
 
 goose-up-by-one:
-	$(SET_ENV) GOOSE_DRIVER=$(GOOSE_DRIVER) && \
-	$(SET_ENV) GOOSE_DBSTRING=$(GOOSE_DBSTRING) && \
-	goose -dir=$(GOOSE_MIGRATION_DIR) up-by-one
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema up-by-one"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema up-by-one
+endif
+
+goose-status:
+	@echo "[INFO] Checking migration status..."
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema status"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema status
+endif
+
+goose-version:
+	@echo "[INFO] Checking current migration version..."
+ifeq ($(OS),Windows_NT)
+	@cmd /c "set GOOSE_DRIVER=mysql&& set GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo&& goose -dir=sql/schema version"
+else
+	@GOOSE_DRIVER=mysql GOOSE_DBSTRING=root:strongpassword123!@tcp(127.0.0.1:3306)/shopDevgo goose -dir=sql/schema version
+endif
 
 # -------------------------
 # SQL & Swagger
@@ -480,7 +509,7 @@ endif
 .PHONY: help init build dev watch run \
 	docker-up docker-down docker-build clean logs \
 	dump-schema dump-full \
-	goose-create goose-up goose-down goose-reset goose-up-by-one \
+	goose-create goose-up goose-down goose-reset goose-up-by-one goose-status goose-version \
 	sqlgen swag start stop restart status stop-all switch-to-dev switch-to-prod \
 	monitoring monitoring-up monitoring-down monitoring-status monitoring-logs \
 	debezium-register debezium-status debezium-delete debezium-restart debezium-connectors debezium-health debezium-setup
